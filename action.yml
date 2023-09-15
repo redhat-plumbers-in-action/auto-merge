@@ -1,19 +1,44 @@
 ---
 
-name: 'Your name here'
+name: Auto Merge
+description: GitHub Action that merges PR if specified conditions are met
 
-description: 'Provide a description here'
-
-author: 'Your name or organization here'
+branding:
+  icon: git-merge
+  color: green
 
 inputs:
-  milliseconds: # change this
+  pr-metadata:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: Pull Request metadata
+  config-path:
+    required: true
+    default: .github/auto-merge.yml
+    description: Path to configuration file
+
+  tracker:
+    required: true
+    description: tracker ID
+  tracker-type:
+    required: true
+    description: tracker type, supported values are 'bugzilla' and 'jira'
+
+  bugzilla-instance:
+    description: Bugzilla instance URL
+    default: https://bugzilla.redhat.com
+  bugzilla-api-token:
+    description: Bugzilla API TOKEN
+
+  jira-instance:
+    description: Jira instance URL
+    default: https://issues.redhat.com
+  jira-api-token:
+    description: Jira API TOKEN
+
+  token:
+    required: true
+    description: GitHub TOKEN or PAT
 
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
-
-...
+  using: node20
+  main: dist/index.js
