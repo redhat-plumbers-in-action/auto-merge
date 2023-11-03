@@ -117,7 +117,7 @@ async function action(
     );
   }
 
-  if (err.length < 0) {
+  if (err.length == 0) {
     const isMerged = await pr.merge();
 
     if (isMerged) {
