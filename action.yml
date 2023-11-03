@@ -1,6 +1,6 @@
 ---
 
-name: Auto Merge
+name: Plumber Auto Merge
 description: GitHub Action that merges PR if specified conditions are met
 
 branding:
