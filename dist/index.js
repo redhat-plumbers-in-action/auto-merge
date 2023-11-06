@@ -90658,7 +90658,7 @@ class PullRequest {
             repo: this.repo,
             pull_number: this.number,
             headers: {
-                authorization: `token ${(0,core.getInput)('token', { required: true })}`,
+                'X-GitHub-Api-Version': '2022-11-28',
             },
         });
         (0,core.debug)(`Pull Request: ${JSON.stringify(data)}`);

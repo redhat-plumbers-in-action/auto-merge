@@ -1,4 +1,4 @@
-import { getInput, debug } from '@actions/core';
+import { debug } from '@actions/core';
 import { pullRequestApiSchema } from './schema/pull-request';
 export class PullRequest {
     constructor(metadata, ref, owner, repo, octokit) {
@@ -19,7 +19,7 @@ export class PullRequest {
             repo: this.repo,
             pull_number: this.number,
             headers: {
-                authorization: `token ${getInput('token', { required: true })}`,
+                'X-GitHub-Api-Version': '2022-11-28',
             },
         });
         debug(`Pull Request: ${JSON.stringify(data)}`);
