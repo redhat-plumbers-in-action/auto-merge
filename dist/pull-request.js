@@ -1,6 +1,5 @@
-import { getInput, isDebug } from '@actions/core';
+import { getInput, debug } from '@actions/core';
 import { pullRequestApiSchema } from './schema/pull-request';
-import { debug } from 'console';
 export class PullRequest {
     constructor(metadata, ref, owner, repo, octokit) {
         this.ref = ref;
@@ -23,7 +22,7 @@ export class PullRequest {
                 authorization: `token ${getInput('token', { required: true })}`,
             },
         });
-        isDebug() && debug(`Pull Request: ${JSON.stringify(data)}`);
+        debug(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
         this.targetBranch = safeData.base;
