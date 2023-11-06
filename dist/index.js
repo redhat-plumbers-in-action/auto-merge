@@ -90664,7 +90664,7 @@ class PullRequest {
                 authorization: `token ${(0,core.getInput)('token', { required: true })}`,
             },
         });
-        (0,external_console_.debug)(`Pull Request: ${JSON.stringify(data)}`);
+        (0,core.isDebug)() && (0,external_console_.debug)(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
         this.targetBranch = safeData.base;
