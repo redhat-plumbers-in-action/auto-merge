@@ -1,4 +1,5 @@
 import { pullRequestApiSchema } from './schema/pull-request';
+import { debug } from 'console';
 export class PullRequest {
     constructor(metadata, ref, owner, repo, octokit) {
         this.ref = ref;
@@ -18,6 +19,7 @@ export class PullRequest {
             repo: this.repo,
             pull_number: this.number,
         });
+        debug(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
         this.targetBranch = safeData.base;

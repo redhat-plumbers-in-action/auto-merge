@@ -2,6 +2,7 @@ import { CustomOctokit } from './octokit';
 
 import { pullRequestApiSchema } from './schema/pull-request';
 import { PullRequestMetadata } from './schema/input';
+import { debug } from 'console';
 
 export class PullRequest {
   readonly number: number;
@@ -34,6 +35,7 @@ export class PullRequest {
       }
     );
 
+    debug(`Pull Request: ${JSON.stringify(data)}`);
     const safeData = pullRequestApiSchema.parse(data);
 
     this.title = safeData.title;
