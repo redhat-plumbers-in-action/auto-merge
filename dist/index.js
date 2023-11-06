@@ -90461,6 +90461,7 @@ async function action(octokit, owner, repo, pr) {
     let labels = { add: [] };
     const tracker = (0,core.getInput)('tracker', { required: true });
     await trackerController.adapter.getIssueDetails(tracker);
+    await pr.initialize();
     if (pr.draft || pr.currentLabels.includes(config.labels['dont-merge'])) {
         err.push(`🔴 Pull Request is marked as draft or has \`${config.labels['dont-merge']}\` label`);
     }
@@ -90566,7 +90567,6 @@ const checkRunID = (await octokit.request('POST /repos/{owner}/{repo}/check-runs
 })).data.id;
 try {
     const pr = new _pull_request__WEBPACK_IMPORTED_MODULE_3__/* .PullRequest */ .i(prMetadata, commitSha, owner, repo, octokit);
-    await pr.initialize();
     const message = await (0,_action__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)(octokit, owner, repo, pr);
     await (0,_util__WEBPACK_IMPORTED_MODULE_4__/* .updateStatusCheck */ .B3)(octokit, checkRunID, owner, repo, 'completed', 'success', message);
 }

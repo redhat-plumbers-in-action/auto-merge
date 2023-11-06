@@ -29,6 +29,7 @@ async function action(octokit, owner, repo, pr) {
     let labels = { add: [] };
     const tracker = getInput('tracker', { required: true });
     await trackerController.adapter.getIssueDetails(tracker);
+    await pr.initialize();
     if (pr.draft || pr.currentLabels.includes(config.labels['dont-merge'])) {
         err.push(`🔴 Pull Request is marked as draft or has \`${config.labels['dont-merge']}\` label`);
     }
