@@ -1,4 +1,4 @@
-import { getInput } from '@actions/core';
+import { getInput, isDebug } from '@actions/core';
 import { pullRequestApiSchema } from './schema/pull-request';
 import { debug } from 'console';
 export class PullRequest {
@@ -23,7 +23,7 @@ export class PullRequest {
                 authorization: `token ${getInput('token', { required: true })}`,
             },
         });
-        debug(`Pull Request: ${JSON.stringify(data)}`);
+        isDebug() && debug(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
         this.targetBranch = safeData.base;
