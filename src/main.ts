@@ -45,7 +45,6 @@ const checkRunID = (
 
 try {
   const pr = new PullRequest(prMetadata, commitSha, owner, repo, octokit);
-  await pr.initialize();
   const message = await action(octokit, owner, repo, pr);
 
   await updateStatusCheck(

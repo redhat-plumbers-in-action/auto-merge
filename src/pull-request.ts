@@ -1,4 +1,4 @@
-import { getInput, debug } from '@actions/core';
+import { debug } from '@actions/core';
 
 import { CustomOctokit } from './octokit';
 
