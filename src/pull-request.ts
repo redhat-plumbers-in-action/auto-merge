@@ -1,10 +1,9 @@
-import { getInput, isDebug } from '@actions/core';
+import { getInput, debug } from '@actions/core';
 
 import { CustomOctokit } from './octokit';
 
 import { pullRequestApiSchema } from './schema/pull-request';
 import { PullRequestMetadata } from './schema/input';
-import { debug } from 'console';
 
 export class PullRequest {
   readonly number: number;
@@ -40,7 +39,7 @@ export class PullRequest {
       }
     );
 
-    isDebug() && debug(`Pull Request: ${JSON.stringify(data)}`);
+    debug(`Pull Request: ${JSON.stringify(data)}`);
     const safeData = pullRequestApiSchema.parse(data);
 
     this.title = safeData.title;

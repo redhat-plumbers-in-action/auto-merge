@@ -90636,10 +90636,7 @@ const pullRequestApiSchema = lib.z.object({
     mergeable_state: lib.z.string(),
 });
 
-// EXTERNAL MODULE: external "console"
-var external_console_ = __nccwpck_require__(96206);
 ;// CONCATENATED MODULE: ./src/pull-request.ts
-
 
 
 class PullRequest {
@@ -90664,7 +90661,7 @@ class PullRequest {
                 authorization: `token ${(0,core.getInput)('token', { required: true })}`,
             },
         });
-        (0,core.isDebug)() && (0,external_console_.debug)(`Pull Request: ${JSON.stringify(data)}`);
+        (0,core.debug)(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
         this.targetBranch = safeData.base;
