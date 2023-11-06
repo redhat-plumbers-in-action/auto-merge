@@ -90620,6 +90620,8 @@ __nccwpck_require__.d(__webpack_exports__, {
   "i": () => (/* binding */ PullRequest)
 });
 
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(42186);
 // EXTERNAL MODULE: ./node_modules/zod/lib/index.mjs
 var lib = __nccwpck_require__(52300);
 ;// CONCATENATED MODULE: ./src/schema/pull-request.ts
@@ -90637,6 +90639,7 @@ const pullRequestApiSchema = lib.z.object({
 // EXTERNAL MODULE: external "console"
 var external_console_ = __nccwpck_require__(96206);
 ;// CONCATENATED MODULE: ./src/pull-request.ts
+
 
 
 class PullRequest {
@@ -90657,6 +90660,9 @@ class PullRequest {
             owner: this.owner,
             repo: this.repo,
             pull_number: this.number,
+            headers: {
+                authorization: `token ${(0,core.getInput)('token', { required: true })}`,
+            },
         });
         (0,external_console_.debug)(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
