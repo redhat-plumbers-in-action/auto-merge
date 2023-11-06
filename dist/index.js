@@ -90634,7 +90634,10 @@ const pullRequestApiSchema = lib.z.object({
     mergeable_state: lib.z.string(),
 });
 
+// EXTERNAL MODULE: external "console"
+var external_console_ = __nccwpck_require__(96206);
 ;// CONCATENATED MODULE: ./src/pull-request.ts
+
 
 class PullRequest {
     constructor(metadata, ref, owner, repo, octokit) {
@@ -90655,6 +90658,7 @@ class PullRequest {
             repo: this.repo,
             pull_number: this.number,
         });
+        (0,external_console_.debug)(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
         this.targetBranch = safeData.base;
