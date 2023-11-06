@@ -34,7 +34,7 @@ export class PullRequest {
         repo: this.repo,
         pull_number: this.number,
         headers: {
-          authorization: `token ${getInput('token', { required: true })}`,
+          'X-GitHub-Api-Version': '2022-11-28',
         },
       }
     );
