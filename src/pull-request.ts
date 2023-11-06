@@ -1,3 +1,5 @@
+import { getInput } from '@actions/core';
+
 import { CustomOctokit } from './octokit';
 
 import { pullRequestApiSchema } from './schema/pull-request';
@@ -32,6 +34,9 @@ export class PullRequest {
         owner: this.owner,
         repo: this.repo,
         pull_number: this.number,
+        headers: {
+          authorization: `token ${getInput('token', { required: true })}`,
+        },
       }
     );
 

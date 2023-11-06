@@ -1,3 +1,4 @@
+import { getInput } from '@actions/core';
 import { pullRequestApiSchema } from './schema/pull-request';
 import { debug } from 'console';
 export class PullRequest {
@@ -18,6 +19,9 @@ export class PullRequest {
             owner: this.owner,
             repo: this.repo,
             pull_number: this.number,
+            headers: {
+                authorization: `token ${getInput('token', { required: true })}`,
+            },
         });
         debug(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
