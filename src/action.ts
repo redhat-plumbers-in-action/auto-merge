@@ -120,9 +120,11 @@ async function action(
   }
 
   if (err.length == 0) {
+    debug(`No errors found, merging pull request`);
     const isMerged = await pr.merge();
 
     if (isMerged) {
+      debug(`Pull Request was merged`);
       await trackerController.adapter.addMergeComment(
         pr.title,
         pr.targetBranch,
