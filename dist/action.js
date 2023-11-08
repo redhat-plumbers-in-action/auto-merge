@@ -49,7 +49,9 @@ async function action(octokit, owner, repo, pr) {
             message.push(`🟠 Pull Request meet requirements, \`mergeable_state\` is \`unstable\``);
             break;
         default:
-            err.push(`🔴 Pull Request doesn't meet requirements, \`mergeable_state\` is \`${pr === null || pr === void 0 ? void 0 : pr.mergeableState}\``);
+            // Mergeable state is seems to be broken - https://github.com/orgs/community/discussions/73849
+            // Let's not block PRs because of that, we are checking the CI anyway
+            message.push(`🟠 Pull Request doesn't meet requirements, \`mergeable_state\` is \`${pr === null || pr === void 0 ? void 0 : pr.mergeableState}\``);
     }
     // This check has to be last before merging action because it is setting manual-merge label
     if (!config.targetBranch.includes(pr.targetBranch)) {
