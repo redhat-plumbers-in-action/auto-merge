@@ -91,8 +91,10 @@ async function action(
       break;
 
     default:
-      err.push(
-        `🔴 Pull Request doesn't meet requirements, \`mergeable_state\` is \`${pr?.mergeableState}\``
+      // Mergeable state is seems to be broken - https://github.com/orgs/community/discussions/73849
+      // Let's not block PRs because of that, we are checking the CI anyway
+      message.push(
+        `🟠 Pull Request doesn't meet requirements, \`mergeable_state\` is \`${pr?.mergeableState}\``
       );
   }
 
