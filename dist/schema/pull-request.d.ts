@@ -22,6 +22,7 @@ export declare const pullRequestApiSchema: z.ZodObject<{
     }>, "many">;
     draft: z.ZodBoolean;
     merged: z.ZodBoolean;
+    mergeable: z.ZodNullable<z.ZodBoolean>;
     mergeable_state: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     number: number;
@@ -30,6 +31,7 @@ export declare const pullRequestApiSchema: z.ZodObject<{
     title: string;
     draft: boolean;
     merged: boolean;
+    mergeable: boolean | null;
     mergeable_state: string;
 }, {
     number: number;
@@ -42,6 +44,7 @@ export declare const pullRequestApiSchema: z.ZodObject<{
     title: string;
     draft: boolean;
     merged: boolean;
+    mergeable: boolean | null;
     mergeable_state: string;
 }>;
 export type PullRequestApi = z.infer<typeof pullRequestApiSchema>;

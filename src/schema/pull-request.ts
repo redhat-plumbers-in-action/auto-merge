@@ -9,6 +9,7 @@ export const pullRequestApiSchema = z.object({
   ),
   draft: z.boolean(),
   merged: z.boolean(),
+  mergeable: z.boolean().nullable(),
   mergeable_state: z.string(),
 });
 

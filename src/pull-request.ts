@@ -2,7 +2,7 @@ import { debug } from '@actions/core';
 
 import { CustomOctokit } from './octokit';
 
-import { pullRequestApiSchema } from './schema/pull-request';
+import { PullRequestApi, pullRequestApiSchema } from './schema/pull-request';
 import { PullRequestMetadata } from './schema/input';
 
 export class PullRequest {
@@ -11,6 +11,7 @@ export class PullRequest {
 
   title = '';
   targetBranch = '';
+  mergeable: PullRequestApi['mergeable'] = null;
   mergeableState = 'unknown';
   draft: boolean | undefined;
   currentLabels: string[] = [];
@@ -44,6 +45,7 @@ export class PullRequest {
 
     this.title = safeData.title;
     this.targetBranch = safeData.base;
+    this.mergeable = safeData.mergeable;
     this.mergeableState = safeData.mergeable_state;
     this.currentLabels = safeData.labels;
     this.draft = safeData.draft;

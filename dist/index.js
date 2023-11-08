@@ -90473,6 +90473,12 @@ async function action(octokit, owner, repo, pr) {
     else {
         message.push(`🟢 Pull Request meet requirements, title has correct form`);
     }
+    if (pr.mergeable !== true) {
+        err.push(`🔴 Pull Request can't be merged, \`mergeable\` is \`${pr.mergeable}\``);
+    }
+    else {
+        message.push(`🟢 Pull Request meet requirements, \`mergeable\` is \`true\``);
+    }
     switch (pr === null || pr === void 0 ? void 0 : pr.mergeableState) {
         case 'clean':
             message.push(`🟢 Pull Request meet requirements, \`mergeable_state\` is \`clean\``);
@@ -90637,6 +90643,7 @@ const pullRequestApiSchema = lib.z.object({
     labels: lib.z.array(lib.z.object({ name: lib.z.string() }).transform(label => label.name)),
     draft: lib.z.boolean(),
     merged: lib.z.boolean(),
+    mergeable: lib.z.boolean().nullable(),
     mergeable_state: lib.z.string(),
 });
 
@@ -90651,6 +90658,7 @@ class PullRequest {
         this.octokit = octokit;
         this.title = '';
         this.targetBranch = '';
+        this.mergeable = null;
         this.mergeableState = 'unknown';
         this.currentLabels = [];
         this.number = metadata.number;
@@ -90669,6 +90677,7 @@ class PullRequest {
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
         this.targetBranch = safeData.base;
+        this.mergeable = safeData.mergeable;
         this.mergeableState = safeData.mergeable_state;
         this.currentLabels = safeData.labels;
         this.draft = safeData.draft;

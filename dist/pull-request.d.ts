@@ -1,4 +1,5 @@
 import { CustomOctokit } from './octokit';
+import { PullRequestApi } from './schema/pull-request';
 import { PullRequestMetadata } from './schema/input';
 export declare class PullRequest {
     readonly ref: string;
@@ -9,6 +10,7 @@ export declare class PullRequest {
     readonly url: string;
     title: string;
     targetBranch: string;
+    mergeable: PullRequestApi['mergeable'];
     mergeableState: string;
     draft: boolean | undefined;
     currentLabels: string[];
