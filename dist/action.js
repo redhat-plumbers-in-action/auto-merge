@@ -41,6 +41,12 @@ async function action(octokit, owner, repo, pr) {
     else {
         message.push(`🟢 Pull Request meet requirements, title has correct form`);
     }
+    if (pr.mergeable !== true) {
+        err.push(`🔴 Pull Request can't be merged, \`mergeable\` is \`${pr.mergeable}\``);
+    }
+    else {
+        message.push(`🟢 Pull Request meet requirements, \`mergeable\` is \`true\``);
+    }
     switch (pr === null || pr === void 0 ? void 0 : pr.mergeableState) {
         case 'clean':
             message.push(`🟢 Pull Request meet requirements, \`mergeable_state\` is \`clean\``);

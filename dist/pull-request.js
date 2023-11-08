@@ -8,6 +8,7 @@ export class PullRequest {
         this.octokit = octokit;
         this.title = '';
         this.targetBranch = '';
+        this.mergeable = null;
         this.mergeableState = 'unknown';
         this.currentLabels = [];
         this.number = metadata.number;
@@ -26,6 +27,7 @@ export class PullRequest {
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
         this.targetBranch = safeData.base;
+        this.mergeable = safeData.mergeable;
         this.mergeableState = safeData.mergeable_state;
         this.currentLabels = safeData.labels;
         this.draft = safeData.draft;

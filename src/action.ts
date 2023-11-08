@@ -77,6 +77,16 @@ async function action(
     message.push(`🟢 Pull Request meet requirements, title has correct form`);
   }
 
+  if (pr.mergeable !== true) {
+    err.push(
+      `🔴 Pull Request can't be merged, \`mergeable\` is \`${pr.mergeable}\``
+    );
+  } else {
+    message.push(
+      `🟢 Pull Request meet requirements, \`mergeable\` is \`true\``
+    );
+  }
+
   switch (pr?.mergeableState) {
     case 'clean':
       message.push(
