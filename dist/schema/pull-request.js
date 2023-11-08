@@ -4,7 +4,7 @@ export const pullRequestApiSchema = z.object({
     title: z.string(),
     base: z.object({ ref: z.string() }).transform(base => base.ref),
     labels: z.array(z.object({ name: z.string() }).transform(label => label.name)),
-    draft: z.boolean(),
+    draft: z.boolean().optional(),
     merged: z.boolean(),
     mergeable: z.boolean().nullable(),
     mergeable_state: z.string(),

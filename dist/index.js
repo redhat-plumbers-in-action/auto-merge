@@ -90641,7 +90641,7 @@ const pullRequestApiSchema = lib.z.object({
     title: lib.z.string(),
     base: lib.z.object({ ref: lib.z.string() }).transform(base => base.ref),
     labels: lib.z.array(lib.z.object({ name: lib.z.string() }).transform(label => label.name)),
-    draft: lib.z.boolean(),
+    draft: lib.z.boolean().optional(),
     merged: lib.z.boolean(),
     mergeable: lib.z.boolean().nullable(),
     mergeable_state: lib.z.string(),
