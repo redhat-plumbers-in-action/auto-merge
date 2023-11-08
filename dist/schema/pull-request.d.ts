@@ -20,7 +20,7 @@ export declare const pullRequestApiSchema: z.ZodObject<{
     }>, string, {
         name: string;
     }>, "many">;
-    draft: z.ZodBoolean;
+    draft: z.ZodOptional<z.ZodBoolean>;
     merged: z.ZodBoolean;
     mergeable: z.ZodNullable<z.ZodBoolean>;
     mergeable_state: z.ZodString;
@@ -29,10 +29,10 @@ export declare const pullRequestApiSchema: z.ZodObject<{
     base: string;
     labels: string[];
     title: string;
-    draft: boolean;
     merged: boolean;
     mergeable: boolean | null;
     mergeable_state: string;
+    draft?: boolean | undefined;
 }, {
     number: number;
     base: {
@@ -42,9 +42,9 @@ export declare const pullRequestApiSchema: z.ZodObject<{
         name: string;
     }[];
     title: string;
-    draft: boolean;
     merged: boolean;
     mergeable: boolean | null;
     mergeable_state: string;
+    draft?: boolean | undefined;
 }>;
 export type PullRequestApi = z.infer<typeof pullRequestApiSchema>;

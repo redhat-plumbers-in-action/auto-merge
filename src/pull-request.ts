@@ -9,12 +9,12 @@ export class PullRequest {
   readonly number: number;
   readonly url: string;
 
-  title = '';
-  targetBranch = '';
+  title: PullRequestApi['title'] = '';
+  targetBranch: PullRequestApi['base'] = '';
   mergeable: PullRequestApi['mergeable'] = null;
-  mergeableState = 'unknown';
-  draft: boolean | undefined;
-  currentLabels: string[] = [];
+  mergeableState: PullRequestApi['mergeable_state'] = 'unknown';
+  draft: PullRequestApi['draft'];
+  currentLabels: PullRequestApi['labels'] = [];
 
   constructor(
     metadata: PullRequestMetadata,

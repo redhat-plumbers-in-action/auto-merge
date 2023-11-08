@@ -8,12 +8,12 @@ export declare class PullRequest {
     readonly octokit: CustomOctokit;
     readonly number: number;
     readonly url: string;
-    title: string;
-    targetBranch: string;
+    title: PullRequestApi['title'];
+    targetBranch: PullRequestApi['base'];
     mergeable: PullRequestApi['mergeable'];
-    mergeableState: string;
-    draft: boolean | undefined;
-    currentLabels: string[];
+    mergeableState: PullRequestApi['mergeable_state'];
+    draft: PullRequestApi['draft'];
+    currentLabels: PullRequestApi['labels'];
     constructor(metadata: PullRequestMetadata, ref: string, owner: string, repo: string, octokit: CustomOctokit);
     initialize(): Promise<void>;
     merge(): Promise<boolean>;
