@@ -269,3 +269,4 @@ The target branches on which the Pull Request will be automatically merged. If t
 ## Limitations
 
 * Status checks from Pull Request Validator are randomly assigned to check suites, GitHub API for check suites doesn't provide a way to assign a check to a specific suite.
+* Specific branch protection rules might block the merge of a Pull Request even if all requirements are satisfied. If you encounter a message like this: `Error: You're not authorized to push to this branch. Visit https://docs.github.com/articles/about-protected-branches/ for more information.` you should check your branch protection rules. The issue is usually caused by the `Restrict who can push to matching branches` option.
