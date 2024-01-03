@@ -480,6 +480,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@octokit/openapi-types@npm:^19.1.0":
+  version: 19.1.0
+  resolution: "@octokit/openapi-types@npm:19.1.0"
+  checksum: 9d1b188741609a9832b964df2bc337ee77c1fc89d5f686faebb743c7cb27721e214180d623ee28227427b4c43719b79ee4890e338a709b78a9f249a7c369ac3e
+  languageName: node
+  linkType: hard
+
 "@octokit/plugin-paginate-rest@npm:^9.0.0":
   version: 9.1.2
   resolution: "@octokit/plugin-paginate-rest@npm:9.1.2"
@@ -508,6 +515,18 @@ __metadata:
   peerDependencies:
     "@octokit/core": ">=5"
   checksum: b036354fac9ba1feac4c607bc1e66eb17c8b08d56a47059a0eff4726b1860ce576ee48c2104487ffcfef2a764b1371c3f7d9d818d102d2143993cd517cb0f268
+  languageName: node
+  linkType: hard
+
+"@octokit/plugin-throttling@npm:^8.1.3":
+  version: 8.1.3
+  resolution: "@octokit/plugin-throttling@npm:8.1.3"
+  dependencies:
+    "@octokit/types": ^12.2.0
+    bottleneck: ^2.15.3
+  peerDependencies:
+    "@octokit/core": ^5.0.0
+  checksum: 98963ef2eab825015702b1ca1ef4ccbda0c009242e93001144e51014d3b53d3ecb1282b67488680c7f5f4e805d0c3af4020ad673079fff92c6353f04903a9a64
   languageName: node
   linkType: hard
 
@@ -553,6 +572,15 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": ^19.0.2
   checksum: f58615971818ff38f0e8f2f1afaf680fb5ecc3873052095c3987a58b2358aced79690f1b94cedabac43c9353c5149d92c29136484817ca4c1398abe614db9eca
+  languageName: node
+  linkType: hard
+
+"@octokit/types@npm:^12.2.0":
+  version: 12.4.0
+  resolution: "@octokit/types@npm:12.4.0"
+  dependencies:
+    "@octokit/openapi-types": ^19.1.0
+  checksum: 17bca450efc5433f14e1f93a24232316a0fb490aec8d886c3a430e853f10a74e6664751a44e0e199336b23c20658c4afcb3590e422ba7c155c2cb31f433ebbb7
   languageName: node
   linkType: hard
 
@@ -1125,6 +1153,7 @@ __metadata:
     "@actions/core": ^1.10.1
     "@actions/github": ^6.0.0
     "@octokit/core": ^5.0.1
+    "@octokit/plugin-throttling": ^8.1.3
     "@octokit/rest": ^20.0.2
     "@octokit/types": ^12.1.1
     "@probot/octokit-plugin-config": ^2.0.0
@@ -1176,6 +1205,13 @@ __metadata:
   version: 1.6.51
   resolution: "big-integer@npm:1.6.51"
   checksum: 3d444173d1b2e20747e2c175568bedeebd8315b0637ea95d75fd27830d3b8e8ba36c6af40374f36bdaea7b5de376dcada1b07587cb2a79a928fccdb6e6e3c518
+  languageName: node
+  linkType: hard
+
+"bottleneck@npm:^2.15.3":
+  version: 2.19.5
+  resolution: "bottleneck@npm:2.19.5"
+  checksum: c5eef1bbea12cef1f1405e7306e7d24860568b0f7ac5eeab706a86762b3fc65ef6d1c641c8a166e4db90f412fc5c948fc5ce8008a8cd3d28c7212ef9c3482bda
   languageName: node
   linkType: hard
 
