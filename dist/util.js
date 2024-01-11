@@ -1,4 +1,5 @@
 import { debug } from '@actions/core';
+import { AutoMergeError } from './error';
 // Update check run - check completed + conclusion
 // ! Allow specifying workflow run when creating a checkrun from a GitHub workflow
 // !FIXME: Issue - https://github.com/orgs/community/discussions/14891#discussioncomment-6110666
@@ -21,13 +22,13 @@ export function getFailedMessage(error) {
     if (error.length === 0) {
         return '';
     }
-    return '### Failed' + '\n\n' + error.join('\n');
+    return '#### Failed' + '\n\n' + error.join('\n');
 }
 export function getSuccessMessage(message) {
     if (message.length === 0) {
         return '';
     }
-    return '### Success' + '\n\n' + message.join('\n');
+    return '#### Success' + '\n\n' + message.join('\n');
 }
 export async function setLabels(octokit, owner, repo, issueNumber, labels) {
     if (labels.length === 0) {
@@ -50,6 +51,6 @@ export async function removeLabel(octokit, owner, repo, issueNumber, label) {
     });
 }
 export function raise(error) {
-    throw new Error(error);
+    throw new AutoMergeError(error);
 }
 //# sourceMappingURL=util.js.map

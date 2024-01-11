@@ -47,7 +47,9 @@ async function action(
       break;
 
     default:
-      raise(`Missing tracker or Unknown tracker type: '${trackerType}'`);
+      raise(
+        `🔴 Missing tracker or Unknown tracker type; type: '${trackerType}'`
+      );
   }
 
   let message: string[] = [];

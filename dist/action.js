@@ -22,7 +22,7 @@ async function action(octokit, owner, repo, pr) {
             debug(`Using Jira '${jiraInstance}', version: '${await trackerController.adapter.getVersion()}'`);
             break;
         default:
-            raise(`Missing tracker or Unknown tracker type: '${trackerType}'`);
+            raise(`🔴 Missing tracker or Unknown tracker type; type: '${trackerType}'`);
     }
     let message = [];
     let err = [];
