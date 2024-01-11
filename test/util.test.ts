@@ -15,7 +15,7 @@ describe('test basic utility functions', () => {
     message = getFailedMessage(errors);
 
     expect(message).toMatchInlineSnapshot(`
-      "### Failed
+      "#### Failed
 
       error1
       error2"
@@ -32,7 +32,7 @@ describe('test basic utility functions', () => {
     message = getSuccessMessage(success);
 
     expect(message).toMatchInlineSnapshot(`
-      "### Success
+      "#### Success
 
       success1
       success2"
