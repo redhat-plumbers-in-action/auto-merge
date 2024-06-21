@@ -3,8 +3,6 @@ import { PullRequestApi } from './schema/pull-request';
 import { PullRequestMetadata } from './schema/input';
 export declare class PullRequest {
     readonly ref: string;
-    readonly owner: string;
-    readonly repo: string;
     readonly octokit: CustomOctokit;
     readonly number: number;
     readonly url: string;
@@ -14,7 +12,7 @@ export declare class PullRequest {
     mergeableState: PullRequestApi['mergeable_state'];
     draft: PullRequestApi['draft'];
     currentLabels: PullRequestApi['labels'];
-    constructor(metadata: PullRequestMetadata, ref: string, owner: string, repo: string, octokit: CustomOctokit);
+    constructor(metadata: PullRequestMetadata, ref: string, octokit: CustomOctokit);
     initialize(): Promise<void>;
     merge(): Promise<boolean>;
 }

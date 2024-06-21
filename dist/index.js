@@ -85256,7 +85256,7 @@ class Jira {
 
 
 
-async function action(octokit, owner, repo, pr) {
+async function action(octokit, pr) {
     const trackerType = (0,core.getInput)('tracker-type');
     const config = await Config.getConfig(octokit);
     let trackerController = undefined;
@@ -85323,7 +85323,7 @@ async function action(octokit, owner, repo, pr) {
     }
     else {
         if (pr.currentLabels.includes(config.labels['manual-merge'])) {
-            (0,util/* removeLabel */.qv)(octokit, owner, repo, pr.number, config.labels['manual-merge']);
+            (0,util/* removeLabel */.qv)(octokit, pr.number, config.labels['manual-merge']);
         }
         message.push(`🟢 Pull Request has correct target branch \`${pr.targetBranch}\``);
     }
@@ -85337,7 +85337,7 @@ async function action(octokit, owner, repo, pr) {
             }
             message.push(`🟢 Pull Request was merged`);
             if (pr.currentLabels.includes(config.labels['manual-merge'])) {
-                (0,util/* removeLabel */.qv)(octokit, owner, repo, pr.number, config.labels['manual-merge']);
+                (0,util/* removeLabel */.qv)(octokit, pr.number, config.labels['manual-merge']);
             }
         }
         else {
@@ -85345,7 +85345,7 @@ async function action(octokit, owner, repo, pr) {
             labels.add.push(config.labels['manual-merge']);
         }
     }
-    (0,util/* setLabels */.Uu)(octokit, owner, repo, pr.number, labels.add);
+    (0,util/* setLabels */.Uu)(octokit, pr.number, labels.add);
     if (err.length > 0) {
         (0,util/* raise */.OU)((0,util/* getFailedMessage */.T5)(err) + '\n\n' + (0,util/* getSuccessMessage */.Yr)(message));
     }
@@ -85378,14 +85378,14 @@ class AutoMergeError extends Error {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(42186);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var zod__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(52300);
-/* harmony import */ var _action__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(29753);
-/* harmony import */ var _error__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(6388);
-/* harmony import */ var _octokit__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(86989);
-/* harmony import */ var _pull_request__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(14806);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(92629);
-/* harmony import */ var _schema_input__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(9281);
-var _a, _b;
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(95438);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _action__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(29753);
+/* harmony import */ var _error__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(6388);
+/* harmony import */ var _octokit__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(86989);
+/* harmony import */ var _pull_request__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(14806);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(92629);
+/* harmony import */ var _schema_input__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(9281);
 
 
 
@@ -85395,39 +85395,25 @@ var _a, _b;
 
 
 
-const octokit = (0,_octokit__WEBPACK_IMPORTED_MODULE_3__/* .getOctokit */ .P)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('token', { required: true }));
-const owner = zod__WEBPACK_IMPORTED_MODULE_7__.z.string()
-    .min(1)
-    .parse((_a = process.env.GITHUB_REPOSITORY) === null || _a === void 0 ? void 0 : _a.split('/')[0]);
-const repo = zod__WEBPACK_IMPORTED_MODULE_7__.z.string()
-    .min(1)
-    .parse((_b = process.env.GITHUB_REPOSITORY) === null || _b === void 0 ? void 0 : _b.split('/')[1]);
+const octokit = (0,_octokit__WEBPACK_IMPORTED_MODULE_4__/* .getOctokit */ .P)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('token', { required: true }));
 const prMetadataUnsafe = JSON.parse((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('pr-metadata', { required: true }));
-const prMetadata = _schema_input__WEBPACK_IMPORTED_MODULE_6__/* .pullRequestMetadataSchema.parse */ .z5.parse(prMetadataUnsafe);
+const prMetadata = _schema_input__WEBPACK_IMPORTED_MODULE_7__/* .pullRequestMetadataSchema.parse */ .z5.parse(prMetadataUnsafe);
 const commitSha = prMetadata.commits[prMetadata.commits.length - 1].sha;
 const setStatus = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('set-status', { required: true });
 let checkRunID;
 if (setStatus) {
-    checkRunID = (await octokit.request('POST /repos/{owner}/{repo}/check-runs', {
-        owner,
-        repo,
-        name: 'Auto Merge',
-        head_sha: commitSha,
-        status: 'in_progress',
-        started_at: new Date().toISOString(),
-        output: {
+    checkRunID = (await octokit.request('POST /repos/{owner}/{repo}/check-runs', Object.assign(Object.assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { name: 'Auto Merge', head_sha: commitSha, status: 'in_progress', started_at: new Date().toISOString(), output: {
             title: 'Auto Merge',
             summary: 'Auto Merge in progress ...',
-        },
-    })).data.id;
+        } }))).data.id;
 }
 const statusTitle = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('status-title', { required: true });
 try {
-    const pr = new _pull_request__WEBPACK_IMPORTED_MODULE_4__/* .PullRequest */ .i(prMetadata, commitSha, owner, repo, octokit);
+    const pr = new _pull_request__WEBPACK_IMPORTED_MODULE_5__/* .PullRequest */ .i(prMetadata, commitSha, octokit);
     await pr.initialize();
-    let message = await (0,_action__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)(octokit, owner, repo, pr);
+    let message = await (0,_action__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(octokit, pr);
     if (setStatus && checkRunID) {
-        await (0,_util__WEBPACK_IMPORTED_MODULE_5__/* .updateStatusCheck */ .B3)(octokit, checkRunID, owner, repo, 'completed', 'success', message);
+        await (0,_util__WEBPACK_IMPORTED_MODULE_6__/* .updateStatusCheck */ .B3)(octokit, checkRunID, 'completed', 'success', message);
     }
     if (statusTitle.length > 0) {
         message = `### ${statusTitle}\n\n${message}`;
@@ -85443,13 +85429,13 @@ catch (error) {
         message = JSON.stringify(error);
     }
     if (setStatus && checkRunID) {
-        await (0,_util__WEBPACK_IMPORTED_MODULE_5__/* .updateStatusCheck */ .B3)(octokit, checkRunID, owner, repo, 'completed', 'failure', message);
+        await (0,_util__WEBPACK_IMPORTED_MODULE_6__/* .updateStatusCheck */ .B3)(octokit, checkRunID, 'completed', 'failure', message);
     }
     if (statusTitle.length > 0) {
         message = `### ${statusTitle}\n\n${message}`;
     }
     // set status output only if error was thrown by us
-    if (error instanceof _error__WEBPACK_IMPORTED_MODULE_2__/* .AutoMergeError */ .K) {
+    if (error instanceof _error__WEBPACK_IMPORTED_MODULE_3__/* .AutoMergeError */ .K) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setOutput)('status', JSON.stringify(message));
     }
     (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed)(message);
@@ -90853,6 +90839,8 @@ __nccwpck_require__.d(__webpack_exports__, {
 
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(42186);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(95438);
 // EXTERNAL MODULE: ./node_modules/zod/lib/index.mjs
 var lib = __nccwpck_require__(52300);
 ;// CONCATENATED MODULE: ./src/schema/pull-request.ts
@@ -90871,11 +90859,10 @@ const pullRequestApiSchema = lib.z.object({
 ;// CONCATENATED MODULE: ./src/pull-request.ts
 
 
+
 class PullRequest {
-    constructor(metadata, ref, owner, repo, octokit) {
+    constructor(metadata, ref, octokit) {
         this.ref = ref;
-        this.owner = owner;
-        this.repo = repo;
         this.octokit = octokit;
         this.title = '';
         this.targetBranch = '';
@@ -90886,14 +90873,9 @@ class PullRequest {
         this.url = metadata.url;
     }
     async initialize() {
-        const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-            owner: this.owner,
-            repo: this.repo,
-            pull_number: this.number,
-            headers: {
+        const { data } = await this.octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', Object.assign(Object.assign({}, github.context.repo), { pull_number: this.number, headers: {
                 'X-GitHub-Api-Version': '2022-11-28',
-            },
-        });
+            } }));
         (0,core.debug)(`Pull Request: ${JSON.stringify(data)}`);
         const safeData = pullRequestApiSchema.parse(data);
         this.title = safeData.title;
@@ -90904,13 +90886,7 @@ class PullRequest {
         this.draft = safeData.draft;
     }
     async merge() {
-        const { data } = await this.octokit.request('PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge', {
-            owner: this.owner,
-            repo: this.repo,
-            pull_number: this.number,
-            sha: this.ref,
-            merge_method: 'rebase',
-        });
+        const { data } = await this.octokit.request('PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge', Object.assign(Object.assign({}, github.context.repo), { pull_number: this.number, sha: this.ref, merge_method: 'rebase' }));
         return data.merged;
     }
 }
@@ -90954,26 +90930,21 @@ const pullRequestMetadataSchema = zod__WEBPACK_IMPORTED_MODULE_0__.z.object({
 /* harmony export */ });
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(42186);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _error__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(6388);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(95438);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _error__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(6388);
+
 
 
 // Update check run - check completed + conclusion
 // ! Allow specifying workflow run when creating a checkrun from a GitHub workflow
 // !FIXME: Issue - https://github.com/orgs/community/discussions/14891#discussioncomment-6110666
 // !FIXME: Issue - https://github.com/orgs/community/discussions/24616
-async function updateStatusCheck(octokit, checkID, owner, repo, status, conclusion, message) {
-    await octokit.request('PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}', {
-        owner,
-        repo,
-        check_run_id: checkID,
-        status,
-        completed_at: new Date().toISOString(),
-        conclusion,
-        output: {
+async function updateStatusCheck(octokit, checkID, status, conclusion, message) {
+    await octokit.request('PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}', Object.assign(Object.assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { check_run_id: checkID, status, completed_at: new Date().toISOString(), conclusion, output: {
             title: 'Tracker Validation',
             summary: message,
-        },
-    });
+        } }));
 }
 function getFailedMessage(error) {
     if (error.length === 0) {
@@ -90987,28 +90958,18 @@ function getSuccessMessage(message) {
     }
     return '#### Success' + '\n\n' + message.join('\n');
 }
-async function setLabels(octokit, owner, repo, issueNumber, labels) {
+async function setLabels(octokit, issueNumber, labels) {
     if (labels.length === 0) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.debug)('No labels to set');
         return;
     }
-    await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', {
-        owner,
-        repo,
-        issue_number: issueNumber,
-        labels,
-    });
+    await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', Object.assign(Object.assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber, labels }));
 }
-async function removeLabel(octokit, owner, repo, issueNumber, label) {
-    await octokit.request('DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels/{name}', {
-        owner,
-        repo,
-        issue_number: issueNumber,
-        name: label,
-    });
+async function removeLabel(octokit, issueNumber, label) {
+    await octokit.request('DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels/{name}', Object.assign(Object.assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber, name: label }));
 }
 function raise(error) {
-    throw new _error__WEBPACK_IMPORTED_MODULE_1__/* .AutoMergeError */ .K(error);
+    throw new _error__WEBPACK_IMPORTED_MODULE_2__/* .AutoMergeError */ .K(error);
 }
 
 

@@ -4,7 +4,7 @@ import { Config } from './config';
 import { Controller } from './controller';
 import { Jira } from './jira';
 import { getFailedMessage, getSuccessMessage, raise, removeLabel, setLabels, } from './util';
-async function action(octokit, owner, repo, pr) {
+async function action(octokit, pr) {
     const trackerType = getInput('tracker-type');
     const config = await Config.getConfig(octokit);
     let trackerController = undefined;
@@ -71,7 +71,7 @@ async function action(octokit, owner, repo, pr) {
     }
     else {
         if (pr.currentLabels.includes(config.labels['manual-merge'])) {
-            removeLabel(octokit, owner, repo, pr.number, config.labels['manual-merge']);
+            removeLabel(octokit, pr.number, config.labels['manual-merge']);
         }
         message.push(`🟢 Pull Request has correct target branch \`${pr.targetBranch}\``);
     }
@@ -85,7 +85,7 @@ async function action(octokit, owner, repo, pr) {
             }
             message.push(`🟢 Pull Request was merged`);
             if (pr.currentLabels.includes(config.labels['manual-merge'])) {
-                removeLabel(octokit, owner, repo, pr.number, config.labels['manual-merge']);
+                removeLabel(octokit, pr.number, config.labels['manual-merge']);
             }
         }
         else {
@@ -93,7 +93,7 @@ async function action(octokit, owner, repo, pr) {
             labels.add.push(config.labels['manual-merge']);
         }
     }
-    setLabels(octokit, owner, repo, pr.number, labels.add);
+    setLabels(octokit, pr.number, labels.add);
     if (err.length > 0) {
         raise(getFailedMessage(err) + '\n\n' + getSuccessMessage(message));
     }
