@@ -16,8 +16,6 @@ import {
 
 async function action(
   octokit: CustomOctokit,
-  owner: string,
-  repo: string,
   pr: PullRequest
 ): Promise<string> {
   const trackerType = getInput('tracker-type');
@@ -124,13 +122,7 @@ async function action(
     );
   } else {
     if (pr.currentLabels.includes(config.labels['manual-merge'])) {
-      removeLabel(
-        octokit,
-        owner,
-        repo,
-        pr.number,
-        config.labels['manual-merge']
-      );
+      removeLabel(octokit, pr.number, config.labels['manual-merge']);
     }
     message.push(
       `🟢 Pull Request has correct target branch \`${pr.targetBranch}\``
@@ -154,13 +146,7 @@ async function action(
 
       message.push(`🟢 Pull Request was merged`);
       if (pr.currentLabels.includes(config.labels['manual-merge'])) {
-        removeLabel(
-          octokit,
-          owner,
-          repo,
-          pr.number,
-          config.labels['manual-merge']
-        );
+        removeLabel(octokit, pr.number, config.labels['manual-merge']);
       }
     } else {
       err.push(`🔴 Pull Request failed to merge, needs manual merge`);
@@ -168,7 +154,7 @@ async function action(
     }
   }
 
-  setLabels(octokit, owner, repo, pr.number, labels.add);
+  setLabels(octokit, pr.number, labels.add);
 
   if (err.length > 0) {
     raise(getFailedMessage(err) + '\n\n' + getSuccessMessage(message));

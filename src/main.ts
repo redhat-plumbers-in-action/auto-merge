@@ -1,6 +1,6 @@
 import { getBooleanInput, getInput, setFailed, setOutput } from '@actions/core';
+import { context } from '@actions/github';
 import { Endpoints } from '@octokit/types';
-import { z } from 'zod';
 
 import '@total-typescript/ts-reset';
 
@@ -13,15 +13,6 @@ import { updateStatusCheck } from './util';
 import { pullRequestMetadataSchema } from './schema/input';
 
 const octokit = getOctokit(getInput('token', { required: true }));
-
-const owner = z
-  .string()
-  .min(1)
-  .parse(process.env.GITHUB_REPOSITORY?.split('/')[0]);
-const repo = z
-  .string()
-  .min(1)
-  .parse(process.env.GITHUB_REPOSITORY?.split('/')[1]);
 
 const prMetadataUnsafe = JSON.parse(
   getInput('pr-metadata', { required: true })
@@ -38,8 +29,7 @@ let checkRunID:
 if (setStatus) {
   checkRunID = (
     await octokit.request('POST /repos/{owner}/{repo}/check-runs', {
-      owner,
-      repo,
+      ...context.repo,
       name: 'Auto Merge',
       head_sha: commitSha,
       status: 'in_progress',
@@ -55,16 +45,14 @@ if (setStatus) {
 const statusTitle = getInput('status-title', { required: true });
 
 try {
-  const pr = new PullRequest(prMetadata, commitSha, owner, repo, octokit);
+  const pr = new PullRequest(prMetadata, commitSha, octokit);
   await pr.initialize();
-  let message = await action(octokit, owner, repo, pr);
+  let message = await action(octokit, pr);
 
   if (setStatus && checkRunID) {
     await updateStatusCheck(
       octokit,
       checkRunID,
-      owner,
-      repo,
       'completed',
       'success',
       message
@@ -88,8 +76,6 @@ try {
     await updateStatusCheck(
       octokit,
       checkRunID,
-      owner,
-      repo,
       'completed',
       'failure',
       message

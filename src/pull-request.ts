@@ -1,4 +1,5 @@
 import { debug } from '@actions/core';
+import { context } from '@actions/github';
 
 import { CustomOctokit } from './octokit';
 
@@ -19,8 +20,6 @@ export class PullRequest {
   constructor(
     metadata: PullRequestMetadata,
     readonly ref: string,
-    readonly owner: string,
-    readonly repo: string,
     readonly octokit: CustomOctokit
   ) {
     this.number = metadata.number;
@@ -31,8 +30,7 @@ export class PullRequest {
     const { data } = await this.octokit.request(
       'GET /repos/{owner}/{repo}/pulls/{pull_number}',
       {
-        owner: this.owner,
-        repo: this.repo,
+        ...context.repo,
         pull_number: this.number,
         headers: {
           'X-GitHub-Api-Version': '2022-11-28',
@@ -55,8 +53,7 @@ export class PullRequest {
     const { data } = await this.octokit.request(
       'PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge',
       {
-        owner: this.owner,
-        repo: this.repo,
+        ...context.repo,
         pull_number: this.number,
         sha: this.ref,
         merge_method: 'rebase',
