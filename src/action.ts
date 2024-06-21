@@ -20,10 +20,10 @@ async function action(
   repo: string,
   pr: PullRequest
 ): Promise<string> {
-  const trackerType = getInput('tracker-type', { required: true });
+  const trackerType = getInput('tracker-type');
   const config = await Config.getConfig(octokit);
 
-  let trackerController: Controller<Bugzilla | Jira>;
+  let trackerController: Controller<Bugzilla | Jira> | undefined = undefined;
 
   switch (trackerType) {
     case 'bugzilla':
@@ -46,6 +46,10 @@ async function action(
       );
       break;
 
+    case 'none':
+      debug(`No tracker specified`);
+      break;
+
     default:
       raise(
         `🔴 Missing tracker or Unknown tracker type; type: '${trackerType}'`
@@ -56,8 +60,10 @@ async function action(
   let err: string[] = [];
   let labels: { add: string[] } = { add: [] };
 
-  const tracker = getInput('tracker', { required: true });
-  await trackerController.adapter.getIssueDetails(tracker);
+  if (trackerController) {
+    const tracker = getInput('tracker', { required: true });
+    await trackerController.adapter.getIssueDetails(tracker);
+  }
 
   if (pr.draft || pr.currentLabels.includes(config.labels['dont-merge'])) {
     err.push(
@@ -137,11 +143,15 @@ async function action(
 
     if (isMerged) {
       debug(`Pull Request was merged`);
-      await trackerController.adapter.addMergeComment(
-        pr.title,
-        pr.targetBranch,
-        pr.url
-      );
+
+      if (trackerController) {
+        await trackerController.adapter.addMergeComment(
+          pr.title,
+          pr.targetBranch,
+          pr.url
+        );
+      }
+
       message.push(`🟢 Pull Request was merged`);
       if (pr.currentLabels.includes(config.labels['manual-merge'])) {
         removeLabel(
