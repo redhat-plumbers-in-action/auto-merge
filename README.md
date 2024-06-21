@@ -175,14 +175,14 @@ Path to configuration file. Configuration file format is described in: [Configur
 The tracker identificator. For example, for Bugzilla: `tracker: 1234567`.
 
 * default value: `undefined`
-* requirements: `required`
+* requirements: `optional`
 
 ### tracker-type
 
-The tracker type. Currently supported: `bugzilla` and `jira`.
+The tracker type. Currently supported: `bugzilla`, `jira`, and `none`. When defined, then also `tracker` input has to be defined.
 
-* default value: `undefined`
-* requirements: `required`
+* default value: `none`
+* requirements: `optional`
 
 ### bugzilla-instance
 

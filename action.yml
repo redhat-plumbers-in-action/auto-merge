@@ -12,15 +12,16 @@ inputs:
     required: true
     description: Pull Request metadata
   config-path:
-    required: true
+    required: false
     default: .github/auto-merge.yml
     description: Path to configuration file
 
   tracker:
-    required: true
+    required: false
     description: tracker ID
   tracker-type:
-    required: true
+    required: false
+    default: 'none'
     description: tracker type, supported values are 'bugzilla' and 'jira'
 
   bugzilla-instance:
@@ -36,7 +37,7 @@ inputs:
     description: Jira API TOKEN
 
   set-status:
-    required: true
+    required: false
     default: 'false'
     description: Set check-run status on Pull Request
   status-title:

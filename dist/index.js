@@ -85257,9 +85257,9 @@ class Jira {
 
 
 async function action(octokit, owner, repo, pr) {
-    const trackerType = (0,core.getInput)('tracker-type', { required: true });
+    const trackerType = (0,core.getInput)('tracker-type');
     const config = await Config.getConfig(octokit);
-    let trackerController;
+    let trackerController = undefined;
     switch (trackerType) {
         case 'bugzilla':
             const bzInstance = (0,core.getInput)('bugzilla-instance', { required: true });
@@ -85273,14 +85273,19 @@ async function action(octokit, owner, repo, pr) {
             trackerController = new Controller(new Jira(jiraInstance, jiraAPIToken));
             (0,core.debug)(`Using Jira '${jiraInstance}', version: '${await trackerController.adapter.getVersion()}'`);
             break;
+        case 'none':
+            (0,core.debug)(`No tracker specified`);
+            break;
         default:
             (0,util/* raise */.OU)(`🔴 Missing tracker or Unknown tracker type; type: '${trackerType}'`);
     }
     let message = [];
     let err = [];
     let labels = { add: [] };
-    const tracker = (0,core.getInput)('tracker', { required: true });
-    await trackerController.adapter.getIssueDetails(tracker);
+    if (trackerController) {
+        const tracker = (0,core.getInput)('tracker', { required: true });
+        await trackerController.adapter.getIssueDetails(tracker);
+    }
     if (pr.draft || pr.currentLabels.includes(config.labels['dont-merge'])) {
         err.push(`🔴 Pull Request is marked as draft or has \`${config.labels['dont-merge']}\` label`);
     }
@@ -85327,7 +85332,9 @@ async function action(octokit, owner, repo, pr) {
         const isMerged = await pr.merge();
         if (isMerged) {
             (0,core.debug)(`Pull Request was merged`);
-            await trackerController.adapter.addMergeComment(pr.title, pr.targetBranch, pr.url);
+            if (trackerController) {
+                await trackerController.adapter.addMergeComment(pr.title, pr.targetBranch, pr.url);
+            }
             message.push(`🟢 Pull Request was merged`);
             if (pr.currentLabels.includes(config.labels['manual-merge'])) {
                 (0,util/* removeLabel */.qv)(octokit, owner, repo, pr.number, config.labels['manual-merge']);
