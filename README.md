@@ -56,14 +56,14 @@ jobs:
 
     steps:
       - name: Repository checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - id: Metadata
         name: Gather Pull Request Metadata
         uses: redhat-plumbers-in-action/gather-pull-request-metadata@v1
 
       - name: Upload artifact with gathered metadata
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pr-metadata
           path: ${{ steps.Metadata.outputs.metadata-file }}
@@ -118,7 +118,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Auto Merge
-        uses: redhat-plumbers-in-action/auto-merge@v1
+        uses: redhat-plumbers-in-action/auto-merge@v2
         with:
           pr-metadata: ${{ needs.download-metadata.outputs.pr-metadata }}
           tracker: ${{ fromJSON(steps.commit-linter.outputs.validated-pr-metadata).validation.tracker.id }}
@@ -137,7 +137,7 @@ Action currently accepts the following options:
 ```yml
 # ...
 
-- uses: redhat-plumbers-in-action/auto-merge@v1
+- uses: redhat-plumbers-in-action/auto-merge@v2
   with:
     pr-metadata:        <pr-metadata.json>
     config-path:        <path to config file>
