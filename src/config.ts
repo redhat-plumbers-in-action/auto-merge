@@ -29,12 +29,20 @@ export class Config {
   static async getConfig(octokit: CustomOctokit): Promise<Config> {
     const path = getInput('config-path', { required: true });
 
+    const overwriteMerge = (
+      _defaultArray: string[],
+      configArray: string[],
+      _options?: deepmerge.Options
+    ) => configArray;
+
     const retrievedConfig = (
       await octokit.config.get({
         ...context.repo,
         path,
         defaults: configs =>
-          deepmerge.all([this.defaults, ...configs]) as Partial<Config>,
+          deepmerge.all([this.defaults, ...configs], {
+            arrayMerge: overwriteMerge,
+          }) as Partial<Config>,
       })
     ).config;
 
