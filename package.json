@@ -32,7 +32,7 @@
     "@octokit/rest": "21.0.2",
     "@octokit/types": "13.6.2",
     "@probot/octokit-plugin-config": "3.0.2",
-    "bugzilla": "3.1.2",
+    "bugzilla": "3.1.4",
     "deepmerge": "4.3.1",
     "jira.js": "4.0.2",
     "zod": "3.23.8"

@@ -1049,7 +1049,7 @@ __metadata:
     "@types/node": "npm:22.8.6"
     "@vercel/ncc": "npm:0.38.3"
     "@vitest/coverage-v8": "npm:2.1.7"
-    bugzilla: "npm:3.1.2"
+    bugzilla: "npm:3.1.4"
     deepmerge: "npm:4.3.1"
     jira.js: "npm:4.0.2"
     prettier: "npm:3.3.3"
@@ -1060,7 +1060,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"axios@npm:^1.0.0, axios@npm:^1.7.7":
+"axios@npm:1.7.7, axios@npm:^1.7.7":
   version: 1.7.7
   resolution: "axios@npm:1.7.7"
   dependencies:
@@ -1108,13 +1108,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bugzilla@npm:3.1.2":
-  version: 3.1.2
-  resolution: "bugzilla@npm:3.1.2"
+"bugzilla@npm:3.1.4":
+  version: 3.1.4
+  resolution: "bugzilla@npm:3.1.4"
   dependencies:
-    axios: "npm:^1.0.0"
-    luxon: "npm:^3.0.1"
-  checksum: 10c0/044c94d0474321556450acc6bfd229f232ec99f6f7b7b544013fcec335d8ec6568838b77ab7de7f4d4f4442a8026f8d701bdfadcebbd7b892bad6dbd6547b758
+    axios: "npm:1.7.7"
+    luxon: "npm:3.5.0"
+  checksum: 10c0/80c3bf0fa8dd717c7aa1937fa3f689b73b848a9afda96ea8e4ad5c3ee542f7902e5251304d2b861a9962446efd16883b0845fc265160d43a01a08e251dbf5bbd
   languageName: node
   linkType: hard
 
@@ -1727,7 +1727,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^3.0.1":
+"luxon@npm:3.5.0":
   version: 3.5.0
   resolution: "luxon@npm:3.5.0"
   checksum: 10c0/335789bba95077db831ef99894edadeb23023b3eb2137a1b56acd0d290082b691cf793143d69e30bc069ec95f0b49f36419f48e951c68014f19ffe12045e3494
