@@ -1051,7 +1051,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:2.1.7"
     bugzilla: "npm:3.1.2"
     deepmerge: "npm:4.3.1"
-    jira.js: "npm:4.0.2"
+    jira.js: "npm:4.0.6"
     prettier: "npm:3.3.3"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.6.3"
@@ -1060,7 +1060,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"axios@npm:^1.0.0, axios@npm:^1.7.7":
+"axios@npm:^1.0.0":
   version: 1.7.7
   resolution: "axios@npm:1.7.7"
   dependencies:
@@ -1068,6 +1068,17 @@ __metadata:
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
   checksum: 10c0/4499efc89e86b0b49ffddc018798de05fab26e3bf57913818266be73279a6418c3ce8f9e934c7d2d707ab8c095e837fc6c90608fb7715b94d357720b5f568af7
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.7.9":
+  version: 1.7.9
+  resolution: "axios@npm:1.7.9"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.0"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10c0/b7a41e24b59fee5f0f26c1fc844b45b17442832eb3a0fb42dd4f1430eb4abc571fe168e67913e8a1d91c993232bd1d1ab03e20e4d1fee8c6147649b576fc1b0b
   languageName: node
   linkType: hard
 
@@ -1454,6 +1465,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"formdata-node@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "formdata-node@npm:6.0.3"
+  checksum: 10c0/9b8ada280c7b0c7314bed57fd50b3562f8825bd3ede6f6231b1bc7683b649e7f3ffb7b0f13d8e9e6cae8042ea21eaf497a7c676d2fe6dc63daefefaea4838240
+  languageName: node
+  linkType: hard
+
 "fs-minipass@npm:^2.0.0":
   version: 2.1.0
   resolution: "fs-minipass@npm:2.1.0"
@@ -1675,14 +1693,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jira.js@npm:4.0.2":
-  version: 4.0.2
-  resolution: "jira.js@npm:4.0.2"
+"jira.js@npm:4.0.6":
+  version: 4.0.6
+  resolution: "jira.js@npm:4.0.6"
   dependencies:
-    axios: "npm:^1.7.7"
-    form-data: "npm:^4.0.0"
-    tslib: "npm:^2.7.0"
-  checksum: 10c0/63bdfa9b14f15771a13d18b377c1d587ed1c8df6f71d2b2c6838160a017ba9b1f425fc90c4d07f99088df32387f437377b86df5253c9e043b083ddce7822e420
+    axios: "npm:^1.7.9"
+    formdata-node: "npm:^6.0.3"
+    mime: "npm:^4.0.6"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/65fb86b704f70c568b3bf0e9e7d9b20e520fbfece78ad94313deac80ec8428e54d5130166fe1411a349277fe70694f9500f83eefbea28e9193a9f689a9b88a98
   languageName: node
   linkType: hard
 
@@ -1803,6 +1822,15 @@ __metadata:
   dependencies:
     mime-db: "npm:1.52.0"
   checksum: 10c0/82fb07ec56d8ff1fc999a84f2f217aa46cb6ed1033fefaabd5785b9a974ed225c90dc72fff460259e66b95b73648596dbcc50d51ed69cdf464af2d237d3149b2
+  languageName: node
+  linkType: hard
+
+"mime@npm:^4.0.6":
+  version: 4.0.6
+  resolution: "mime@npm:4.0.6"
+  bin:
+    mime: bin/cli.js
+  checksum: 10c0/1797b1c6da4cdb817fc18a4b8d99d6034885946f3d3680c2e4eb18bf19d4a64b42559f1eae0d1607e216f584311f9f806b5bfa1426baebeae4807bec5e14188a
   languageName: node
   linkType: hard
 
@@ -2404,10 +2432,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "tslib@npm:2.7.0"
-  checksum: 10c0/469e1d5bf1af585742128827000711efa61010b699cb040ab1800bcd3ccdd37f63ec30642c9e07c4439c1db6e46345582614275daca3e0f4abae29b0083f04a6
+"tslib@npm:^2.8.1":
+  version: 2.8.1
+  resolution: "tslib@npm:2.8.1"
+  checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
   languageName: node
   linkType: hard
 

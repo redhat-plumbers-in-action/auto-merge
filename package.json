@@ -34,7 +34,7 @@
     "@probot/octokit-plugin-config": "3.0.2",
     "bugzilla": "3.1.2",
     "deepmerge": "4.3.1",
-    "jira.js": "4.0.2",
+    "jira.js": "4.0.6",
     "zod": "3.23.8"
   },
   "devDependencies": {
