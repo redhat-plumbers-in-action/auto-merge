@@ -40,7 +40,9 @@ describe('test basic utility functions', () => {
   });
 
   test('raise()', () =>
-    expect(() => raise('new error')).toThrow(new Error('new error')));
+    expect(() => raise('new error')).toThrowErrorMatchingInlineSnapshot(
+      `[Error: new error]`
+    ));
 
   test.todo('setLabels()', async () => {});
 
