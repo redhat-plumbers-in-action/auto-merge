@@ -35,7 +35,7 @@
     "bugzilla": "3.1.4",
     "deepmerge": "4.3.1",
     "jira.js": "4.0.6",
-    "zod": "3.24.2"
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@actions/github": "6.0.0",
