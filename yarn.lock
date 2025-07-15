@@ -882,12 +882,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:24.0.3":
-  version: 24.0.3
-  resolution: "@types/node@npm:24.0.3"
+"@types/node@npm:24.0.14":
+  version: 24.0.14
+  resolution: "@types/node@npm:24.0.14"
   dependencies:
     undici-types: "npm:~7.8.0"
-  checksum: 10c0/9c3c4e87600d1cf11e291c2fd4bfd806a615455463c30a0ef6dc9c801b3423344d9b82b8084e3ccabce485a7421ebb61a66e9676181bd7d9aea4759998a120d5
+  checksum: 10c0/536b5a816554ad1522e9e0c1d517b317f8478798bd76a332d83690aa42b19b5b263eb295ee25f9d0badb430ee6e36412ee9070cb5e3359f6bdcf7e08f94302f1
   languageName: node
   linkType: hard
 
@@ -1125,7 +1125,7 @@ __metadata:
     "@octokit/types": "npm:14.1.0"
     "@probot/octokit-plugin-config": "npm:3.0.2"
     "@total-typescript/ts-reset": "npm:0.6.1"
-    "@types/node": "npm:24.0.3"
+    "@types/node": "npm:24.0.14"
     "@vercel/ncc": "npm:0.38.3"
     "@vitest/coverage-v8": "npm:3.2.4"
     bugzilla: "npm:3.1.4"
