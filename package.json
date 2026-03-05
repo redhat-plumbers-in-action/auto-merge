@@ -42,10 +42,10 @@
     "@total-typescript/ts-reset": "0.6.1",
     "@types/node": "24.10.1",
     "@vercel/ncc": "0.38.4",
-    "@vitest/coverage-v8": "4.0.12",
+    "@vitest/coverage-v8": "4.0.18",
     "prettier": "3.6.2",
     "ts-node": "10.9.2",
     "typescript": "5.9.3",
-    "vitest": "4.0.12"
+    "vitest": "4.0.18"
   }
 }
