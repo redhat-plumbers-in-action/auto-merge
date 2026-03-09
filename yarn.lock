@@ -771,17 +771,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vercel/ncc@npm:0.38.4":
-  version: 0.38.4
-  resolution: "@vercel/ncc@npm:0.38.4"
-  dependencies:
-    node-gyp: "npm:latest"
-  bin:
-    ncc: dist/ncc/cli.js
-  checksum: 10c0/dd6f5e95c09aa2db957788dd1fc7e5dc208b5268dc19a1560f8a71c1b18d234bb8ca0990f972051efcbc8d1cc5458242168bbdca54212a605ed0b4f680d3d876
-  languageName: node
-  linkType: hard
-
 "@vitest/coverage-v8@npm:4.0.18":
   version: 4.0.18
   resolution: "@vitest/coverage-v8@npm:4.0.18"
@@ -977,10 +966,10 @@ __metadata:
     "@probot/octokit-plugin-config": "npm:4.1.0"
     "@total-typescript/ts-reset": "npm:0.6.1"
     "@types/node": "npm:25.3.5"
-    "@vercel/ncc": "npm:0.38.4"
     "@vitest/coverage-v8": "npm:4.0.18"
     bugzilla: "npm:3.1.5"
     deepmerge: "npm:4.3.1"
+    esbuild: "npm:^0.27.3"
     jira.js: "npm:5.3.1"
     prettier: "npm:3.8.1"
     ts-node: "npm:10.9.2"
@@ -1204,7 +1193,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.27.0":
+"esbuild@npm:^0.27.0, esbuild@npm:^0.27.3":
   version: 0.27.3
   resolution: "esbuild@npm:0.27.3"
   dependencies:
