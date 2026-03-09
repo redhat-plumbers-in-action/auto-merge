@@ -33,6 +33,9 @@ inputs:
   jira-instance:
     description: Jira instance URL
     default: https://issues.redhat.com
+  jira-email:
+    description: Jira email
+    default: systemd-maint@redhat.com
   jira-api-token:
     description: Jira API TOKEN
 

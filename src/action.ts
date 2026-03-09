@@ -19,6 +19,7 @@ async function action(
   pr: PullRequest
 ): Promise<string> {
   const trackerType = getInput('tracker-type');
+  const jiraEmail = getInput('jira-email', { required: true });
   const config = await Config.getConfig(octokit);
 
   let trackerController: Controller<Bugzilla | Jira> | undefined = undefined;
@@ -38,7 +39,9 @@ async function action(
       const jiraInstance = getInput('jira-instance', { required: true });
       const jiraAPIToken = getInput('jira-api-token', { required: true });
 
-      trackerController = new Controller(new Jira(jiraInstance, jiraAPIToken));
+      trackerController = new Controller(
+        new Jira(jiraInstance, jiraAPIToken, jiraEmail)
+      );
       debug(
         `Using Jira '${jiraInstance}', version: '${await trackerController.adapter.getVersion()}'`
       );
