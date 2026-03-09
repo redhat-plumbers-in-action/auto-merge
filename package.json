@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/main.ts",
   "scripts": {
-    "build": "esbuild ./src/main.ts --bundle --outdir=dist --platform=node --target=node24.0.0 --packages=bundle --format=esm",
+    "build": "esbuild ./src/main.ts --bundle --outdir=dist --platform=node --target=node24.0.0 --packages=bundle --format=esm --external:debug",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
     "test": "vitest run --coverage",

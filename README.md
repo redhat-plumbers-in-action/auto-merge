@@ -125,7 +125,7 @@ jobs:
           tracker-type: ${{ fromJSON(steps.commit-linter.outputs.validated-pr-metadata).validation.tracker.type }}
           bugzilla-instance: https://bugzilla.redhat.com
           bugzilla-api-token: ${{ secrets.BUGZILLA_API_TOKEN }}
-          jira-instance: https://issues.redhat.com
+          jira-instance: https://redhat.atlassian.net
           jira-api-token: ${{ secrets.JIRA_API_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -200,7 +200,7 @@ The Bugzilla API token is used for performing API requests. The token should be 
 
 ### jira-instance
 
-The URL of the Jira instance on which will be performed API requests and validation of trackers. For example: `jira-instance: https://issues.redhat.com`.
+The URL of the Jira instance on which will be performed API requests and validation of trackers. For example: `jira-instance: https://redhat.atlassian.net`.
 
 * default value: `undefined`
 * requirements: `required`
