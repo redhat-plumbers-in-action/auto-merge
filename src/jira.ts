@@ -1,21 +1,23 @@
-import { Version2Client } from 'jira.js';
+import { Version3Client } from 'jira.js';
 
 import { Adapter, IssueDetails } from './controller';
 import { raise } from './util';
 
-export class Jira implements Adapter<Version2Client> {
-  readonly api: Version2Client;
+export class Jira implements Adapter<Version3Client> {
+  readonly api: Version3Client;
   issueDetails: IssueDetails | undefined;
 
   constructor(
     readonly instance: string,
-    apiToken: string
+    apiToken: string,
+    email: string
   ) {
-    this.api = new Version2Client({
+    this.api = new Version3Client({
       host: instance,
       authentication: {
-        oauth2: {
-          accessToken: apiToken,
+        basic: {
+          email,
+          apiToken,
         },
       },
     });
