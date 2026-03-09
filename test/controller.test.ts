@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, test } from 'vitest';
 
 import BugzillaAPI from 'bugzilla';
-import { Version2Client } from 'jira.js';
+import { Version3Client } from 'jira.js';
 
 import {
   Controller,
@@ -19,7 +19,7 @@ describe('test class Controller', () => {
 
   test('type SupportedAdapters', () => {
     expectTypeOf<SupportedAdapters<Bugzilla>>().toEqualTypeOf<BugzillaAPI>();
-    expectTypeOf<SupportedAdapters<Jira>>().toEqualTypeOf<Version2Client>();
+    expectTypeOf<SupportedAdapters<Jira>>().toEqualTypeOf<Version3Client>();
     expectTypeOf<SupportedAdapters<never>>().toBeNever();
   });
 
@@ -32,10 +32,12 @@ describe('test class Controller', () => {
     expect(bugzilla.adapter).toBeInstanceOf(Bugzilla);
     expect(bugzilla.adapter.api).toBeInstanceOf(BugzillaAPI);
 
-    const jira = new Controller(new Jira('https://issues.redhat.com', 'token'));
+    const jira = new Controller(
+      new Jira('https://redhat.atlassian.net', 'token', 'email')
+    );
 
     expect(jira).toBeInstanceOf(Controller<Jira>);
     expect(jira.adapter).toBeInstanceOf(Jira);
-    expect(jira.adapter.api).toBeInstanceOf(Version2Client);
+    expect(jira.adapter.api).toBeInstanceOf(Version3Client);
   });
 });

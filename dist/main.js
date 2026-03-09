@@ -29763,769 +29763,6 @@ var require_proxy_from_env = __commonJS({
   }
 });
 
-// node_modules/ms/index.js
-var require_ms = __commonJS({
-  "node_modules/ms/index.js"(exports, module) {
-    var s2 = 1e3;
-    var m = s2 * 60;
-    var h = m * 60;
-    var d = h * 24;
-    var w = d * 7;
-    var y = d * 365.25;
-    module.exports = function(val, options) {
-      options = options || {};
-      var type = typeof val;
-      if (type === "string" && val.length > 0) {
-        return parse5(val);
-      } else if (type === "number" && isFinite(val)) {
-        return options.long ? fmtLong(val) : fmtShort(val);
-      }
-      throw new Error(
-        "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
-      );
-    };
-    function parse5(str) {
-      str = String(str);
-      if (str.length > 100) {
-        return;
-      }
-      var match2 = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-        str
-      );
-      if (!match2) {
-        return;
-      }
-      var n2 = parseFloat(match2[1]);
-      var type = (match2[2] || "ms").toLowerCase();
-      switch (type) {
-        case "years":
-        case "year":
-        case "yrs":
-        case "yr":
-        case "y":
-          return n2 * y;
-        case "weeks":
-        case "week":
-        case "w":
-          return n2 * w;
-        case "days":
-        case "day":
-        case "d":
-          return n2 * d;
-        case "hours":
-        case "hour":
-        case "hrs":
-        case "hr":
-        case "h":
-          return n2 * h;
-        case "minutes":
-        case "minute":
-        case "mins":
-        case "min":
-        case "m":
-          return n2 * m;
-        case "seconds":
-        case "second":
-        case "secs":
-        case "sec":
-        case "s":
-          return n2 * s2;
-        case "milliseconds":
-        case "millisecond":
-        case "msecs":
-        case "msec":
-        case "ms":
-          return n2;
-        default:
-          return void 0;
-      }
-    }
-    function fmtShort(ms) {
-      var msAbs = Math.abs(ms);
-      if (msAbs >= d) {
-        return Math.round(ms / d) + "d";
-      }
-      if (msAbs >= h) {
-        return Math.round(ms / h) + "h";
-      }
-      if (msAbs >= m) {
-        return Math.round(ms / m) + "m";
-      }
-      if (msAbs >= s2) {
-        return Math.round(ms / s2) + "s";
-      }
-      return ms + "ms";
-    }
-    function fmtLong(ms) {
-      var msAbs = Math.abs(ms);
-      if (msAbs >= d) {
-        return plural(ms, msAbs, d, "day");
-      }
-      if (msAbs >= h) {
-        return plural(ms, msAbs, h, "hour");
-      }
-      if (msAbs >= m) {
-        return plural(ms, msAbs, m, "minute");
-      }
-      if (msAbs >= s2) {
-        return plural(ms, msAbs, s2, "second");
-      }
-      return ms + " ms";
-    }
-    function plural(ms, msAbs, n2, name) {
-      var isPlural = msAbs >= n2 * 1.5;
-      return Math.round(ms / n2) + " " + name + (isPlural ? "s" : "");
-    }
-  }
-});
-
-// node_modules/debug/src/common.js
-var require_common = __commonJS({
-  "node_modules/debug/src/common.js"(exports, module) {
-    function setup(env) {
-      createDebug.debug = createDebug;
-      createDebug.default = createDebug;
-      createDebug.coerce = coerce;
-      createDebug.disable = disable;
-      createDebug.enable = enable;
-      createDebug.enabled = enabled;
-      createDebug.humanize = require_ms();
-      createDebug.destroy = destroy;
-      Object.keys(env).forEach((key) => {
-        createDebug[key] = env[key];
-      });
-      createDebug.names = [];
-      createDebug.skips = [];
-      createDebug.formatters = {};
-      function selectColor(namespace) {
-        let hash2 = 0;
-        for (let i = 0; i < namespace.length; i++) {
-          hash2 = (hash2 << 5) - hash2 + namespace.charCodeAt(i);
-          hash2 |= 0;
-        }
-        return createDebug.colors[Math.abs(hash2) % createDebug.colors.length];
-      }
-      createDebug.selectColor = selectColor;
-      function createDebug(namespace) {
-        let prevTime;
-        let enableOverride = null;
-        let namespacesCache;
-        let enabledCache;
-        function debug2(...args) {
-          if (!debug2.enabled) {
-            return;
-          }
-          const self2 = debug2;
-          const curr = Number(/* @__PURE__ */ new Date());
-          const ms = curr - (prevTime || curr);
-          self2.diff = ms;
-          self2.prev = prevTime;
-          self2.curr = curr;
-          prevTime = curr;
-          args[0] = createDebug.coerce(args[0]);
-          if (typeof args[0] !== "string") {
-            args.unshift("%O");
-          }
-          let index = 0;
-          args[0] = args[0].replace(/%([a-zA-Z%])/g, (match2, format) => {
-            if (match2 === "%%") {
-              return "%";
-            }
-            index++;
-            const formatter = createDebug.formatters[format];
-            if (typeof formatter === "function") {
-              const val = args[index];
-              match2 = formatter.call(self2, val);
-              args.splice(index, 1);
-              index--;
-            }
-            return match2;
-          });
-          createDebug.formatArgs.call(self2, args);
-          const logFn = self2.log || createDebug.log;
-          logFn.apply(self2, args);
-        }
-        debug2.namespace = namespace;
-        debug2.useColors = createDebug.useColors();
-        debug2.color = createDebug.selectColor(namespace);
-        debug2.extend = extend4;
-        debug2.destroy = createDebug.destroy;
-        Object.defineProperty(debug2, "enabled", {
-          enumerable: true,
-          configurable: false,
-          get: () => {
-            if (enableOverride !== null) {
-              return enableOverride;
-            }
-            if (namespacesCache !== createDebug.namespaces) {
-              namespacesCache = createDebug.namespaces;
-              enabledCache = createDebug.enabled(namespace);
-            }
-            return enabledCache;
-          },
-          set: (v) => {
-            enableOverride = v;
-          }
-        });
-        if (typeof createDebug.init === "function") {
-          createDebug.init(debug2);
-        }
-        return debug2;
-      }
-      function extend4(namespace, delimiter) {
-        const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
-        newDebug.log = this.log;
-        return newDebug;
-      }
-      function enable(namespaces) {
-        createDebug.save(namespaces);
-        createDebug.namespaces = namespaces;
-        createDebug.names = [];
-        createDebug.skips = [];
-        const split = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
-        for (const ns of split) {
-          if (ns[0] === "-") {
-            createDebug.skips.push(ns.slice(1));
-          } else {
-            createDebug.names.push(ns);
-          }
-        }
-      }
-      function matchesTemplate(search, template) {
-        let searchIndex = 0;
-        let templateIndex = 0;
-        let starIndex = -1;
-        let matchIndex = 0;
-        while (searchIndex < search.length) {
-          if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === "*")) {
-            if (template[templateIndex] === "*") {
-              starIndex = templateIndex;
-              matchIndex = searchIndex;
-              templateIndex++;
-            } else {
-              searchIndex++;
-              templateIndex++;
-            }
-          } else if (starIndex !== -1) {
-            templateIndex = starIndex + 1;
-            matchIndex++;
-            searchIndex = matchIndex;
-          } else {
-            return false;
-          }
-        }
-        while (templateIndex < template.length && template[templateIndex] === "*") {
-          templateIndex++;
-        }
-        return templateIndex === template.length;
-      }
-      function disable() {
-        const namespaces = [
-          ...createDebug.names,
-          ...createDebug.skips.map((namespace) => "-" + namespace)
-        ].join(",");
-        createDebug.enable("");
-        return namespaces;
-      }
-      function enabled(name) {
-        for (const skip of createDebug.skips) {
-          if (matchesTemplate(name, skip)) {
-            return false;
-          }
-        }
-        for (const ns of createDebug.names) {
-          if (matchesTemplate(name, ns)) {
-            return true;
-          }
-        }
-        return false;
-      }
-      function coerce(val) {
-        if (val instanceof Error) {
-          return val.stack || val.message;
-        }
-        return val;
-      }
-      function destroy() {
-        console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-      }
-      createDebug.enable(createDebug.load());
-      return createDebug;
-    }
-    module.exports = setup;
-  }
-});
-
-// node_modules/debug/src/browser.js
-var require_browser = __commonJS({
-  "node_modules/debug/src/browser.js"(exports, module) {
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.storage = localstorage();
-    exports.destroy = /* @__PURE__ */ (() => {
-      let warned = false;
-      return () => {
-        if (!warned) {
-          warned = true;
-          console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-        }
-      };
-    })();
-    exports.colors = [
-      "#0000CC",
-      "#0000FF",
-      "#0033CC",
-      "#0033FF",
-      "#0066CC",
-      "#0066FF",
-      "#0099CC",
-      "#0099FF",
-      "#00CC00",
-      "#00CC33",
-      "#00CC66",
-      "#00CC99",
-      "#00CCCC",
-      "#00CCFF",
-      "#3300CC",
-      "#3300FF",
-      "#3333CC",
-      "#3333FF",
-      "#3366CC",
-      "#3366FF",
-      "#3399CC",
-      "#3399FF",
-      "#33CC00",
-      "#33CC33",
-      "#33CC66",
-      "#33CC99",
-      "#33CCCC",
-      "#33CCFF",
-      "#6600CC",
-      "#6600FF",
-      "#6633CC",
-      "#6633FF",
-      "#66CC00",
-      "#66CC33",
-      "#9900CC",
-      "#9900FF",
-      "#9933CC",
-      "#9933FF",
-      "#99CC00",
-      "#99CC33",
-      "#CC0000",
-      "#CC0033",
-      "#CC0066",
-      "#CC0099",
-      "#CC00CC",
-      "#CC00FF",
-      "#CC3300",
-      "#CC3333",
-      "#CC3366",
-      "#CC3399",
-      "#CC33CC",
-      "#CC33FF",
-      "#CC6600",
-      "#CC6633",
-      "#CC9900",
-      "#CC9933",
-      "#CCCC00",
-      "#CCCC33",
-      "#FF0000",
-      "#FF0033",
-      "#FF0066",
-      "#FF0099",
-      "#FF00CC",
-      "#FF00FF",
-      "#FF3300",
-      "#FF3333",
-      "#FF3366",
-      "#FF3399",
-      "#FF33CC",
-      "#FF33FF",
-      "#FF6600",
-      "#FF6633",
-      "#FF9900",
-      "#FF9933",
-      "#FFCC00",
-      "#FFCC33"
-    ];
-    function useColors() {
-      if (typeof window !== "undefined" && window.process && (window.process.type === "renderer" || window.process.__nwjs)) {
-        return true;
-      }
-      if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
-        return false;
-      }
-      let m;
-      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
-      typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
-      // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-      typeof navigator !== "undefined" && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
-      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
-    }
-    function formatArgs(args) {
-      args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module.exports.humanize(this.diff);
-      if (!this.useColors) {
-        return;
-      }
-      const c = "color: " + this.color;
-      args.splice(1, 0, c, "color: inherit");
-      let index = 0;
-      let lastC = 0;
-      args[0].replace(/%[a-zA-Z%]/g, (match2) => {
-        if (match2 === "%%") {
-          return;
-        }
-        index++;
-        if (match2 === "%c") {
-          lastC = index;
-        }
-      });
-      args.splice(lastC, 0, c);
-    }
-    exports.log = console.debug || console.log || (() => {
-    });
-    function save(namespaces) {
-      try {
-        if (namespaces) {
-          exports.storage.setItem("debug", namespaces);
-        } else {
-          exports.storage.removeItem("debug");
-        }
-      } catch (error49) {
-      }
-    }
-    function load() {
-      let r;
-      try {
-        r = exports.storage.getItem("debug") || exports.storage.getItem("DEBUG");
-      } catch (error49) {
-      }
-      if (!r && typeof process !== "undefined" && "env" in process) {
-        r = process.env.DEBUG;
-      }
-      return r;
-    }
-    function localstorage() {
-      try {
-        return localStorage;
-      } catch (error49) {
-      }
-    }
-    module.exports = require_common()(exports);
-    var { formatters } = module.exports;
-    formatters.j = function(v) {
-      try {
-        return JSON.stringify(v);
-      } catch (error49) {
-        return "[UnexpectedJSONParseError]: " + error49.message;
-      }
-    };
-  }
-});
-
-// node_modules/has-flag/index.js
-var require_has_flag = __commonJS({
-  "node_modules/has-flag/index.js"(exports, module) {
-    "use strict";
-    module.exports = (flag, argv = process.argv) => {
-      const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
-      const position = argv.indexOf(prefix + flag);
-      const terminatorPosition = argv.indexOf("--");
-      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
-    };
-  }
-});
-
-// node_modules/supports-color/index.js
-var require_supports_color = __commonJS({
-  "node_modules/supports-color/index.js"(exports, module) {
-    "use strict";
-    var os5 = __require("os");
-    var tty = __require("tty");
-    var hasFlag = require_has_flag();
-    var { env } = process;
-    var forceColor;
-    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
-      forceColor = 0;
-    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
-      forceColor = 1;
-    }
-    if ("FORCE_COLOR" in env) {
-      if (env.FORCE_COLOR === "true") {
-        forceColor = 1;
-      } else if (env.FORCE_COLOR === "false") {
-        forceColor = 0;
-      } else {
-        forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-      }
-    }
-    function translateLevel(level) {
-      if (level === 0) {
-        return false;
-      }
-      return {
-        level,
-        hasBasic: true,
-        has256: level >= 2,
-        has16m: level >= 3
-      };
-    }
-    function supportsColor(haveStream, streamIsTTY) {
-      if (forceColor === 0) {
-        return 0;
-      }
-      if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
-        return 3;
-      }
-      if (hasFlag("color=256")) {
-        return 2;
-      }
-      if (haveStream && !streamIsTTY && forceColor === void 0) {
-        return 0;
-      }
-      const min = forceColor || 0;
-      if (env.TERM === "dumb") {
-        return min;
-      }
-      if (process.platform === "win32") {
-        const osRelease = os5.release().split(".");
-        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
-          return Number(osRelease[2]) >= 14931 ? 3 : 2;
-        }
-        return 1;
-      }
-      if ("CI" in env) {
-        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
-          return 1;
-        }
-        return min;
-      }
-      if ("TEAMCITY_VERSION" in env) {
-        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-      }
-      if (env.COLORTERM === "truecolor") {
-        return 3;
-      }
-      if ("TERM_PROGRAM" in env) {
-        const version2 = parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
-        switch (env.TERM_PROGRAM) {
-          case "iTerm.app":
-            return version2 >= 3 ? 3 : 2;
-          case "Apple_Terminal":
-            return 2;
-        }
-      }
-      if (/-256(color)?$/i.test(env.TERM)) {
-        return 2;
-      }
-      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-        return 1;
-      }
-      if ("COLORTERM" in env) {
-        return 1;
-      }
-      return min;
-    }
-    function getSupportLevel(stream7) {
-      const level = supportsColor(stream7, stream7 && stream7.isTTY);
-      return translateLevel(level);
-    }
-    module.exports = {
-      supportsColor: getSupportLevel,
-      stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-      stderr: translateLevel(supportsColor(true, tty.isatty(2)))
-    };
-  }
-});
-
-// node_modules/debug/src/node.js
-var require_node = __commonJS({
-  "node_modules/debug/src/node.js"(exports, module) {
-    var tty = __require("tty");
-    var util5 = __require("util");
-    exports.init = init;
-    exports.log = log;
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.destroy = util5.deprecate(
-      () => {
-      },
-      "Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
-    );
-    exports.colors = [6, 2, 3, 4, 5, 1];
-    try {
-      const supportsColor = require_supports_color();
-      if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
-        exports.colors = [
-          20,
-          21,
-          26,
-          27,
-          32,
-          33,
-          38,
-          39,
-          40,
-          41,
-          42,
-          43,
-          44,
-          45,
-          56,
-          57,
-          62,
-          63,
-          68,
-          69,
-          74,
-          75,
-          76,
-          77,
-          78,
-          79,
-          80,
-          81,
-          92,
-          93,
-          98,
-          99,
-          112,
-          113,
-          128,
-          129,
-          134,
-          135,
-          148,
-          149,
-          160,
-          161,
-          162,
-          163,
-          164,
-          165,
-          166,
-          167,
-          168,
-          169,
-          170,
-          171,
-          172,
-          173,
-          178,
-          179,
-          184,
-          185,
-          196,
-          197,
-          198,
-          199,
-          200,
-          201,
-          202,
-          203,
-          204,
-          205,
-          206,
-          207,
-          208,
-          209,
-          214,
-          215,
-          220,
-          221
-        ];
-      }
-    } catch (error49) {
-    }
-    exports.inspectOpts = Object.keys(process.env).filter((key) => {
-      return /^debug_/i.test(key);
-    }).reduce((obj, key) => {
-      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_, k) => {
-        return k.toUpperCase();
-      });
-      let val = process.env[key];
-      if (/^(yes|on|true|enabled)$/i.test(val)) {
-        val = true;
-      } else if (/^(no|off|false|disabled)$/i.test(val)) {
-        val = false;
-      } else if (val === "null") {
-        val = null;
-      } else {
-        val = Number(val);
-      }
-      obj[prop] = val;
-      return obj;
-    }, {});
-    function useColors() {
-      return "colors" in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
-    }
-    function formatArgs(args) {
-      const { namespace: name, useColors: useColors2 } = this;
-      if (useColors2) {
-        const c = this.color;
-        const colorCode = "\x1B[3" + (c < 8 ? c : "8;5;" + c);
-        const prefix = `  ${colorCode};1m${name} \x1B[0m`;
-        args[0] = prefix + args[0].split("\n").join("\n" + prefix);
-        args.push(colorCode + "m+" + module.exports.humanize(this.diff) + "\x1B[0m");
-      } else {
-        args[0] = getDate() + name + " " + args[0];
-      }
-    }
-    function getDate() {
-      if (exports.inspectOpts.hideDate) {
-        return "";
-      }
-      return (/* @__PURE__ */ new Date()).toISOString() + " ";
-    }
-    function log(...args) {
-      return process.stderr.write(util5.formatWithOptions(exports.inspectOpts, ...args) + "\n");
-    }
-    function save(namespaces) {
-      if (namespaces) {
-        process.env.DEBUG = namespaces;
-      } else {
-        delete process.env.DEBUG;
-      }
-    }
-    function load() {
-      return process.env.DEBUG;
-    }
-    function init(debug2) {
-      debug2.inspectOpts = {};
-      const keys = Object.keys(exports.inspectOpts);
-      for (let i = 0; i < keys.length; i++) {
-        debug2.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
-      }
-    }
-    module.exports = require_common()(exports);
-    var { formatters } = module.exports;
-    formatters.o = function(v) {
-      this.inspectOpts.colors = this.useColors;
-      return util5.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
-    };
-    formatters.O = function(v) {
-      this.inspectOpts.colors = this.useColors;
-      return util5.inspect(v, this.inspectOpts);
-    };
-  }
-});
-
-// node_modules/debug/src/index.js
-var require_src = __commonJS({
-  "node_modules/debug/src/index.js"(exports, module) {
-    if (typeof process === "undefined" || process.type === "renderer" || process.browser === true || process.__nwjs) {
-      module.exports = require_browser();
-    } else {
-      module.exports = require_node();
-    }
-  }
-});
-
 // node_modules/follow-redirects/debug.js
 var require_debug = __commonJS({
   "node_modules/follow-redirects/debug.js"(exports, module) {
@@ -30533,7 +29770,7 @@ var require_debug = __commonJS({
     module.exports = function() {
       if (!debug2) {
         try {
-          debug2 = require_src()("follow-redirects");
+          debug2 = __require("debug")("follow-redirects");
         } catch (error49) {
         }
         if (typeof debug2 !== "function") {
@@ -72340,7 +71577,58 @@ var BaseClient = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/announcementBanner.mjs
+// node_modules/jira.js/dist/esm/paramSerializer.mjs
+function paramSerializer(key, values) {
+  if (values === void 0 || values === null)
+    return void 0;
+  if (Array.isArray(values)) {
+    if (values.length === 0)
+      return void 0;
+    return values.map((v, i) => i === 0 ? String(v) : `${key}=${String(v)}`).join("&");
+  }
+  return encodeURIComponent(String(values));
+}
+
+// node_modules/jira.js/dist/esm/version3/models/projectId.mjs
+var ProjectIdSchema = external_exports.strictObject({
+  /** The ID of the project. */
+  id: external_exports.string()
+});
+
+// node_modules/jira.js/dist/esm/version3/models/projectIssueTypes.mjs
+var ProjectIssueTypesSchema = external_exports.object({
+  project: ProjectIdSchema.optional(),
+  issueTypes: external_exports.array(external_exports.string()).optional()
+});
+
+// node_modules/jira.js/dist/esm/version3/models/statusScope.mjs
+var StatusScopeSchema = external_exports.strictObject({
+  /** The scope of the status. `GLOBAL` for company-managed projects and `PROJECT` for team-managed projects. */
+  type: external_exports.enum(["GLOBAL", "PROJECT"]),
+  project: ProjectIdSchema.optional()
+});
+
+// node_modules/jira.js/dist/esm/version3/models/jiraStatus.mjs
+var JiraStatusSchema = external_exports.strictObject({
+  /** The ID of the status. */
+  id: external_exports.string(),
+  /** The name of the status. */
+  name: external_exports.string(),
+  /** The description of the status. */
+  description: external_exports.string(),
+  scope: StatusScopeSchema,
+  /** The category of the status. */
+  statusCategory: external_exports.enum(["TODO", "IN_PROGRESS", "DONE"]),
+  /**
+   * @deprecated See the [deprecation
+   *   notice](https://developer.atlassian.com/cloud/jira/platform/changelog/#CHANGE-2298) for details.
+   *
+   *   Projects and issue types where the status is used. Only available if the `usages` expand is requested.
+   */
+  usages: ProjectIssueTypesSchema.optional()
+});
+
+// node_modules/jira.js/dist/esm/version3/announcementBanner.mjs
 var AnnouncementBanner = class {
   client;
   constructor(client) {
@@ -72348,27 +71636,27 @@ var AnnouncementBanner = class {
   }
   async getBanner(callback) {
     const config3 = {
-      url: "/rest/api/2/announcementBanner",
+      url: "/rest/api/3/announcementBanner",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setBanner(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/announcementBanner",
+      url: "/rest/api/3/announcementBanner",
       method: "PUT",
       data: {
-        isDismissible: parameters.isDismissible,
-        isEnabled: parameters.isEnabled,
-        message: parameters.message,
-        visibility: parameters.visibility
+        isDismissible: parameters?.isDismissible,
+        isEnabled: parameters?.isEnabled,
+        message: parameters?.message,
+        visibility: parameters?.visibility
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/api.mjs
+// node_modules/jira.js/dist/esm/version3/api.mjs
 var Api = class {
   client;
   constructor(client) {
@@ -72386,7 +71674,7 @@ var Api = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/appDataPolicies.mjs
+// node_modules/jira.js/dist/esm/version3/appDataPolicies.mjs
 var AppDataPolicies = class {
   client;
   constructor(client) {
@@ -72394,24 +71682,24 @@ var AppDataPolicies = class {
   }
   async getPolicy(callback) {
     const config3 = {
-      url: "/rest/api/2/data-policy",
+      url: "/rest/api/3/data-policy",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getPolicies(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/data-policy/project",
+      url: "/rest/api/3/data-policy/project",
       method: "GET",
       params: {
-        ids: parameters?.ids
+        ids: typeof parameters.ids === "string" ? parameters.ids : parameters.ids.join(",")
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/applicationRoles.mjs
+// node_modules/jira.js/dist/esm/version3/applicationRoles.mjs
 var ApplicationRoles = class {
   client;
   constructor(client) {
@@ -72419,7 +71707,7 @@ var ApplicationRoles = class {
   }
   async getAllApplicationRoles(callback) {
     const config3 = {
-      url: "/rest/api/2/applicationrole",
+      url: "/rest/api/3/applicationrole",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -72427,14 +71715,14 @@ var ApplicationRoles = class {
   async getApplicationRole(parameters, callback) {
     const key = typeof parameters === "string" ? parameters : parameters.key;
     const config3 = {
-      url: `/rest/api/2/applicationrole/${key}`,
+      url: `/rest/api/3/applicationrole/${key}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/appMigration.mjs
+// node_modules/jira.js/dist/esm/version3/appMigration.mjs
 var AppMigration = class {
   client;
   constructor(client) {
@@ -72484,7 +71772,7 @@ var AppMigration = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/appProperties.mjs
+// node_modules/jira.js/dist/esm/version3/appProperties.mjs
 var AppProperties = class {
   client;
   constructor(client) {
@@ -72551,7 +71839,7 @@ var AppProperties = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/auditRecords.mjs
+// node_modules/jira.js/dist/esm/version3/auditRecords.mjs
 var AuditRecords = class {
   client;
   constructor(client) {
@@ -72559,7 +71847,7 @@ var AuditRecords = class {
   }
   async getAuditRecords(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/auditing/record",
+      url: "/rest/api/3/auditing/record",
       method: "GET",
       params: {
         offset: parameters?.offset,
@@ -72573,7 +71861,7 @@ var AuditRecords = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/avatars.mjs
+// node_modules/jira.js/dist/esm/version3/avatars.mjs
 var Avatars = class {
   client;
   constructor(client) {
@@ -72582,21 +71870,21 @@ var Avatars = class {
   async getAllSystemAvatars(parameters, callback) {
     const type = typeof parameters === "string" ? parameters : parameters.type;
     const config3 = {
-      url: `/rest/api/2/avatar/${type}/system`,
+      url: `/rest/api/3/avatar/${type}/system`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getAvatars(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/universal_avatar/type/${parameters.type}/owner/${parameters.entityId}`,
+      url: `/rest/api/3/universal_avatar/type/${parameters.type}/owner/${parameters.entityId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async storeAvatar(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/universal_avatar/type/${parameters.type}/owner/${parameters.entityId}`,
+      url: `/rest/api/3/universal_avatar/type/${parameters.type}/owner/${parameters.entityId}`,
       method: "POST",
       headers: {
         "X-Atlassian-Token": "no-check",
@@ -72613,7 +71901,7 @@ var Avatars = class {
   }
   async deleteAvatar(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/universal_avatar/type/${parameters.type}/owner/${parameters.owningObjectId}/avatar/${parameters.id}`,
+      url: `/rest/api/3/universal_avatar/type/${parameters.type}/owner/${parameters.owningObjectId}/avatar/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -72621,7 +71909,7 @@ var Avatars = class {
   async getAvatarImageByType(parameters, callback) {
     const type = typeof parameters === "string" ? parameters : parameters.type;
     const config3 = {
-      url: `/rest/api/2/universal_avatar/view/type/${type}`,
+      url: `/rest/api/3/universal_avatar/view/type/${type}`,
       method: "GET",
       responseType: "arraybuffer",
       params: {
@@ -72635,7 +71923,7 @@ var Avatars = class {
   }
   async getAvatarImageByID(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/universal_avatar/view/type/${parameters.type}/avatar/${parameters.id}`,
+      url: `/rest/api/3/universal_avatar/view/type/${parameters.type}/avatar/${parameters.id}`,
       method: "GET",
       responseType: "arraybuffer",
       params: {
@@ -72649,7 +71937,7 @@ var Avatars = class {
   }
   async getAvatarImageByOwner(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/universal_avatar/view/type/${parameters.type}/owner/${parameters.entityId}`,
+      url: `/rest/api/3/universal_avatar/view/type/${parameters.type}/owner/${parameters.entityId}`,
       method: "GET",
       responseType: "arraybuffer",
       params: {
@@ -72663,7 +71951,7 @@ var Avatars = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/classificationLevels.mjs
+// node_modules/jira.js/dist/esm/version3/classificationLevels.mjs
 var ClassificationLevels = class {
   client;
   constructor(client) {
@@ -72671,7 +71959,7 @@ var ClassificationLevels = class {
   }
   async getAllUserDataClassificationLevels(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/classification-levels",
+      url: "/rest/api/3/classification-levels",
       method: "GET",
       params: {
         status: parameters?.status,
@@ -72682,19 +71970,7 @@ var ClassificationLevels = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/paramSerializer.mjs
-function paramSerializer(key, values) {
-  if (values === void 0 || values === null)
-    return void 0;
-  if (Array.isArray(values)) {
-    if (values.length === 0)
-      return void 0;
-    return values.map((v, i) => i === 0 ? String(v) : `${key}=${String(v)}`).join("&");
-  }
-  return encodeURIComponent(String(values));
-}
-
-// node_modules/jira.js/dist/esm/version2/dashboards.mjs
+// node_modules/jira.js/dist/esm/version3/dashboards.mjs
 var Dashboards = class {
   client;
   constructor(client) {
@@ -72702,7 +71978,7 @@ var Dashboards = class {
   }
   async getAllDashboards(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/dashboard",
+      url: "/rest/api/3/dashboard",
       method: "GET",
       params: {
         filter: parameters?.filter,
@@ -72714,7 +71990,7 @@ var Dashboards = class {
   }
   async createDashboard(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/dashboard",
+      url: "/rest/api/3/dashboard",
       method: "POST",
       params: {
         extendAdminPermissions: parameters.extendAdminPermissions
@@ -72730,7 +72006,7 @@ var Dashboards = class {
   }
   async bulkEditDashboards(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/dashboard/bulk/edit",
+      url: "/rest/api/3/dashboard/bulk/edit",
       method: "PUT",
       data: {
         action: parameters.action,
@@ -72744,14 +72020,14 @@ var Dashboards = class {
   }
   async getAllAvailableDashboardGadgets(callback) {
     const config3 = {
-      url: "/rest/api/2/dashboard/gadgets",
+      url: "/rest/api/3/dashboard/gadgets",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getDashboardsPaginated(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/dashboard/search",
+      url: "/rest/api/3/dashboard/search",
       method: "GET",
       params: {
         dashboardName: parameters?.dashboardName,
@@ -72771,19 +72047,19 @@ var Dashboards = class {
   async getAllGadgets(parameters, callback) {
     const dashboardId = typeof parameters === "string" ? parameters : parameters.dashboardId;
     const config3 = {
-      url: `/rest/api/2/dashboard/${dashboardId}/gadget`,
+      url: `/rest/api/3/dashboard/${dashboardId}/gadget`,
       method: "GET",
       params: {
-        moduleKey: typeof parameters !== "string" && paramSerializer("moduleKey", parameters.moduleKey),
+        moduleKey: typeof parameters !== "string" && parameters.moduleKey,
         uri: typeof parameters !== "string" && parameters.uri,
-        gadgetId: typeof parameters !== "string" && paramSerializer("gadgetId", parameters.gadgetId)
+        gadgetId: typeof parameters !== "string" && parameters.gadgetId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async addGadget(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.dashboardId}/gadget`,
+      url: `/rest/api/3/dashboard/${parameters.dashboardId}/gadget`,
       method: "POST",
       data: {
         color: parameters.color,
@@ -72798,7 +72074,7 @@ var Dashboards = class {
   }
   async updateGadget(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.dashboardId}/gadget/${parameters.gadgetId}`,
+      url: `/rest/api/3/dashboard/${parameters.dashboardId}/gadget/${parameters.gadgetId}`,
       method: "PUT",
       data: {
         color: parameters.color,
@@ -72810,28 +72086,28 @@ var Dashboards = class {
   }
   async removeGadget(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.dashboardId}/gadget/${parameters.gadgetId}`,
+      url: `/rest/api/3/dashboard/${parameters.dashboardId}/gadget/${parameters.gadgetId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getDashboardItemPropertyKeys(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.dashboardId}/items/${parameters.itemId}/properties`,
+      url: `/rest/api/3/dashboard/${parameters.dashboardId}/items/${parameters.itemId}/properties`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getDashboardItemProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.dashboardId}/items/${parameters.itemId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/dashboard/${parameters.dashboardId}/items/${parameters.itemId}/properties/${parameters.propertyKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setDashboardItemProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.dashboardId}/items/${parameters.itemId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/dashboard/${parameters.dashboardId}/items/${parameters.itemId}/properties/${parameters.propertyKey}`,
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -72842,7 +72118,7 @@ var Dashboards = class {
   }
   async deleteDashboardItemProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.dashboardId}/items/${parameters.itemId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/dashboard/${parameters.dashboardId}/items/${parameters.itemId}/properties/${parameters.propertyKey}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -72850,14 +72126,14 @@ var Dashboards = class {
   async getDashboard(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/dashboard/${id}`,
+      url: `/rest/api/3/dashboard/${id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateDashboard(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.id}`,
+      url: `/rest/api/3/dashboard/${parameters.id}`,
       method: "PUT",
       params: {
         extendAdminPermissions: parameters.extendAdminPermissions
@@ -72874,14 +72150,14 @@ var Dashboards = class {
   async deleteDashboard(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/dashboard/${id}`,
+      url: `/rest/api/3/dashboard/${id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async copyDashboard(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/dashboard/${parameters.id}/copy`,
+      url: `/rest/api/3/dashboard/${parameters.id}/copy`,
       method: "POST",
       params: {
         extendAdminPermissions: parameters.extendAdminPermissions
@@ -72897,7 +72173,7 @@ var Dashboards = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/dynamicModules.mjs
+// node_modules/jira.js/dist/esm/version3/dynamicModules.mjs
 var DynamicModules = class {
   client;
   constructor(client) {
@@ -72932,7 +72208,7 @@ var DynamicModules = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/fieldSchemes.mjs
+// node_modules/jira.js/dist/esm/version3/fieldSchemes.mjs
 var FieldSchemes = class {
   client;
   constructor(client) {
@@ -72940,7 +72216,7 @@ var FieldSchemes = class {
   }
   async getFieldAssociationSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/config/fieldschemes",
+      url: "/rest/api/3/config/fieldschemes",
       method: "GET",
       params: {
         projectId: parameters?.projectId,
@@ -72953,7 +72229,7 @@ var FieldSchemes = class {
   }
   async createFieldAssociationScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/config/fieldschemes",
+      url: "/rest/api/3/config/fieldschemes",
       method: "POST",
       data: {
         description: parameters.description,
@@ -72964,7 +72240,7 @@ var FieldSchemes = class {
   }
   async updateFieldsAssociatedWithSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/config/fieldschemes/fields",
+      url: "/rest/api/3/config/fieldschemes/fields",
       method: "PUT",
       data: parameters
     };
@@ -72972,7 +72248,7 @@ var FieldSchemes = class {
   }
   async removeFieldsAssociatedWithSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/config/fieldschemes/fields",
+      url: "/rest/api/3/config/fieldschemes/fields",
       method: "DELETE",
       data: parameters
     };
@@ -72980,7 +72256,7 @@ var FieldSchemes = class {
   }
   async updateFieldAssociationSchemeItemParameters(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/config/fieldschemes/fields/parameters",
+      url: "/rest/api/3/config/fieldschemes/fields/parameters",
       method: "PUT",
       data: parameters
     };
@@ -72988,7 +72264,7 @@ var FieldSchemes = class {
   }
   async removeFieldAssociationSchemeItemParameters(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/config/fieldschemes/fields/parameters",
+      url: "/rest/api/3/config/fieldschemes/fields/parameters",
       method: "DELETE",
       data: parameters
     };
@@ -72996,7 +72272,7 @@ var FieldSchemes = class {
   }
   async getProjectsWithFieldSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/config/fieldschemes/projects",
+      url: "/rest/api/3/config/fieldschemes/projects",
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -73008,7 +72284,7 @@ var FieldSchemes = class {
   }
   async associateProjectsToFieldAssociationSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/config/fieldschemes/projects",
+      url: "/rest/api/3/config/fieldschemes/projects",
       method: "PUT",
       data: parameters
     };
@@ -73016,14 +72292,14 @@ var FieldSchemes = class {
   }
   async getFieldAssociationSchemeById(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/config/fieldschemes/${parameters.id}`,
+      url: `/rest/api/3/config/fieldschemes/${parameters.id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateFieldAssociationScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/config/fieldschemes/${parameters.id}`,
+      url: `/rest/api/3/config/fieldschemes/${parameters.id}`,
       method: "PUT",
       data: {
         description: parameters.description,
@@ -73034,14 +72310,14 @@ var FieldSchemes = class {
   }
   async deleteFieldAssociationScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/config/fieldschemes/${parameters.id}`,
+      url: `/rest/api/3/config/fieldschemes/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async searchFieldAssociationSchemeFields(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/config/fieldschemes/${parameters.id}/fields`,
+      url: `/rest/api/3/config/fieldschemes/${parameters.id}/fields`,
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -73053,14 +72329,14 @@ var FieldSchemes = class {
   }
   async getFieldAssociationSchemeItemParameters(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/config/fieldschemes/${parameters.id}/fields/${parameters.fieldId}/parameters`,
+      url: `/rest/api/3/config/fieldschemes/${parameters.id}/fields/${parameters.fieldId}/parameters`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async searchFieldAssociationSchemeProjects(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/config/fieldschemes/${parameters.id}/projects`,
+      url: `/rest/api/3/config/fieldschemes/${parameters.id}/projects`,
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -73072,7 +72348,7 @@ var FieldSchemes = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/filters.mjs
+// node_modules/jira.js/dist/esm/version3/filters.mjs
 var Filters = class {
   client;
   constructor(client) {
@@ -73080,7 +72356,7 @@ var Filters = class {
   }
   async createFilter(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/filter",
+      url: "/rest/api/3/filter",
       method: "POST",
       params: {
         expand: parameters.expand,
@@ -73108,7 +72384,7 @@ var Filters = class {
   }
   async getFavouriteFilters(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/filter/favourite",
+      url: "/rest/api/3/filter/favourite",
       method: "GET",
       params: {
         expand: parameters?.expand
@@ -73118,7 +72394,7 @@ var Filters = class {
   }
   async getMyFilters(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/filter/my",
+      url: "/rest/api/3/filter/my",
       method: "GET",
       params: {
         expand: parameters?.expand,
@@ -73129,7 +72405,7 @@ var Filters = class {
   }
   async getFiltersPaginated(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/filter/search",
+      url: "/rest/api/3/filter/search",
       method: "GET",
       params: {
         filterName: parameters?.filterName,
@@ -73151,7 +72427,7 @@ var Filters = class {
   async getFilter(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/filter/${id}`,
+      url: `/rest/api/3/filter/${id}`,
       method: "GET",
       params: {
         expand: typeof parameters !== "string" && parameters.expand,
@@ -73162,7 +72438,7 @@ var Filters = class {
   }
   async updateFilter(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/filter/${parameters.id}`,
+      url: `/rest/api/3/filter/${parameters.id}`,
       method: "PUT",
       params: {
         expand: parameters.expand,
@@ -73181,7 +72457,7 @@ var Filters = class {
   async deleteFilter(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/filter/${id}`,
+      url: `/rest/api/3/filter/${id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -73189,14 +72465,14 @@ var Filters = class {
   async getColumns(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/filter/${id}/columns`,
+      url: `/rest/api/3/filter/${id}/columns`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setColumns(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/filter/${parameters.id}/columns`,
+      url: `/rest/api/3/filter/${parameters.id}/columns`,
       method: "PUT",
       data: parameters.columns
     };
@@ -73205,7 +72481,7 @@ var Filters = class {
   async resetColumns(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/filter/${id}/columns`,
+      url: `/rest/api/3/filter/${id}/columns`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -73213,7 +72489,7 @@ var Filters = class {
   async setFavouriteForFilter(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/filter/${id}/favourite`,
+      url: `/rest/api/3/filter/${id}/favourite`,
       method: "PUT",
       params: {
         expand: typeof parameters !== "string" && parameters.expand
@@ -73224,7 +72500,7 @@ var Filters = class {
   async deleteFavouriteForFilter(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/filter/${id}/favourite`,
+      url: `/rest/api/3/filter/${id}/favourite`,
       method: "DELETE",
       params: {
         expand: typeof parameters !== "string" && parameters.expand
@@ -73234,7 +72510,7 @@ var Filters = class {
   }
   async changeFilterOwner(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/filter/${parameters.id}/owner`,
+      url: `/rest/api/3/filter/${parameters.id}/owner`,
       method: "PUT",
       data: {
         accountId: parameters.accountId
@@ -73244,7 +72520,7 @@ var Filters = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/filterSharing.mjs
+// node_modules/jira.js/dist/esm/version3/filterSharing.mjs
 var FilterSharing = class {
   client;
   constructor(client) {
@@ -73252,7 +72528,7 @@ var FilterSharing = class {
   }
   async getDefaultShareScope(callback) {
     const config3 = {
-      url: "/rest/api/2/filter/defaultShareScope",
+      url: "/rest/api/3/filter/defaultShareScope",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -73260,7 +72536,7 @@ var FilterSharing = class {
   async setDefaultShareScope(parameters, callback) {
     const scope = typeof parameters === "string" ? parameters : parameters.scope;
     const config3 = {
-      url: "/rest/api/2/filter/defaultShareScope",
+      url: "/rest/api/3/filter/defaultShareScope",
       method: "PUT",
       data: {
         scope
@@ -73271,44 +72547,44 @@ var FilterSharing = class {
   async getSharePermissions(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/filter/${id}/permission`,
+      url: `/rest/api/3/filter/${id}/permission`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async addSharePermission(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/filter/${parameters.id}/permission`,
+      url: `/rest/api/3/filter/${parameters.id}/permission`,
       method: "POST",
       data: {
-        type: parameters.type,
-        projectId: parameters.projectId,
-        groupname: parameters.groupname,
-        projectRoleId: parameters.projectRoleId,
         accountId: parameters.accountId,
+        groupId: parameters.groupId,
+        groupname: parameters.groupname,
+        projectId: parameters.projectId,
+        projectRoleId: parameters.projectRoleId,
         rights: parameters.rights,
-        groupId: parameters.groupId
+        type: parameters.type
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getSharePermission(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/filter/${parameters.id}/permission/${parameters.permissionId}`,
+      url: `/rest/api/3/filter/${parameters.id}/permission/${parameters.permissionId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteSharePermission(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/filter/${parameters.id}/permission/${parameters.permissionId}`,
+      url: `/rest/api/3/filter/${parameters.id}/permission/${parameters.permissionId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/groupAndUserPicker.mjs
+// node_modules/jira.js/dist/esm/version3/groupAndUserPicker.mjs
 var GroupAndUserPicker = class {
   client;
   constructor(client) {
@@ -73316,7 +72592,7 @@ var GroupAndUserPicker = class {
   }
   async findUsersAndGroups(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/groupuserpicker",
+      url: "/rest/api/3/groupuserpicker",
       method: "GET",
       params: {
         query: parameters.query,
@@ -73334,7 +72610,7 @@ var GroupAndUserPicker = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/groups.mjs
+// node_modules/jira.js/dist/esm/version3/groups.mjs
 var Groups = class {
   client;
   constructor(client) {
@@ -73342,7 +72618,7 @@ var Groups = class {
   }
   async createGroup(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/group",
+      url: "/rest/api/3/group",
       method: "POST",
       data: parameters
     };
@@ -73350,7 +72626,7 @@ var Groups = class {
   }
   async removeGroup(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/group",
+      url: "/rest/api/3/group",
       method: "DELETE",
       params: {
         groupname: parameters.groupname,
@@ -73363,7 +72639,7 @@ var Groups = class {
   }
   async bulkGetGroups(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/group/bulk",
+      url: "/rest/api/3/group/bulk",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -73378,7 +72654,7 @@ var Groups = class {
   }
   async getUsersFromGroup(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/group/member",
+      url: "/rest/api/3/group/member",
       method: "GET",
       params: {
         groupname: parameters.groupname,
@@ -73392,10 +72668,10 @@ var Groups = class {
   }
   async addUserToGroup(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/group/user",
+      url: "/rest/api/3/group/user",
       method: "POST",
       params: {
-        groupname: parameters.groupName,
+        groupname: parameters.groupname,
         groupId: parameters.groupId
       },
       data: {
@@ -73407,7 +72683,7 @@ var Groups = class {
   }
   async removeUserFromGroup(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/group/user",
+      url: "/rest/api/3/group/user",
       method: "DELETE",
       params: {
         groupname: parameters.groupname,
@@ -73420,7 +72696,7 @@ var Groups = class {
   }
   async findGroups(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/groups/picker",
+      url: "/rest/api/3/groups/picker",
       method: "GET",
       params: {
         query: parameters?.query,
@@ -73434,7 +72710,22 @@ var Groups = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueAttachments.mjs
+// node_modules/jira.js/dist/esm/version3/instanceInformation.mjs
+var InstanceInformation = class {
+  client;
+  constructor(client) {
+    this.client = client;
+  }
+  async getLicense(callback) {
+    const config3 = {
+      url: "/rest/api/3/instance/license",
+      method: "GET"
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+};
+
+// node_modules/jira.js/dist/esm/version3/issueAttachments.mjs
 var import_mime_types = __toESM(require_mime_types(), 1);
 var IssueAttachments = class {
   client;
@@ -73444,7 +72735,7 @@ var IssueAttachments = class {
   async getAttachmentContent(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/attachment/content/${id}`,
+      url: `/rest/api/3/attachment/content/${id}`,
       method: "GET",
       params: {
         redirect: typeof parameters !== "string" && parameters.redirect
@@ -73455,7 +72746,7 @@ var IssueAttachments = class {
   }
   async getAttachmentMeta(callback) {
     const config3 = {
-      url: "/rest/api/2/attachment/meta",
+      url: "/rest/api/3/attachment/meta",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -73463,7 +72754,7 @@ var IssueAttachments = class {
   async getAttachmentThumbnail(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/attachment/thumbnail/${id}`,
+      url: `/rest/api/3/attachment/thumbnail/${id}`,
       method: "GET",
       params: {
         redirect: typeof parameters !== "string" && parameters.redirect,
@@ -73478,7 +72769,7 @@ var IssueAttachments = class {
   async getAttachment(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/attachment/${id}`,
+      url: `/rest/api/3/attachment/${id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -73486,7 +72777,7 @@ var IssueAttachments = class {
   async removeAttachment(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/attachment/${id}`,
+      url: `/rest/api/3/attachment/${id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -73494,7 +72785,7 @@ var IssueAttachments = class {
   async expandAttachmentForHumans(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/attachment/${id}/expand/human`,
+      url: `/rest/api/3/attachment/${id}/expand/human`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -73502,7 +72793,7 @@ var IssueAttachments = class {
   async expandAttachmentForMachines(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/attachment/${id}/expand/raw`,
+      url: `/rest/api/3/attachment/${id}/expand/raw`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -73515,7 +72806,7 @@ var IssueAttachments = class {
       const { Readable: NodeReadable } = await import("node:stream");
       Readable3 = NodeReadable;
     }
-    for await (const attachment of attachments) {
+    for (const attachment of attachments) {
       const file2 = await this._convertToFile(attachment, Readable3);
       if (!(file2 instanceof File || file2 instanceof Blob)) {
         throw new Error(`Unsupported file type for attachment: ${typeof file2}`);
@@ -73523,7 +72814,7 @@ var IssueAttachments = class {
       formData.append("file", file2, attachment.filename);
     }
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/attachments`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/attachments`,
       method: "POST",
       headers: {
         "X-Atlassian-Token": "no-check",
@@ -73536,6 +72827,16 @@ var IssueAttachments = class {
     return this.client.sendRequest(config3, callback);
   }
   async _convertToFile(attachment, Readable3) {
+    const mergeChunks = (chunks) => {
+      const totalLength = chunks.reduce((sum, c) => sum + c.byteLength, 0);
+      const merged = new Uint8Array(totalLength);
+      let offset2 = 0;
+      for (const c of chunks) {
+        merged.set(c, offset2);
+        offset2 += c.byteLength;
+      }
+      return merged;
+    };
     const toUint8ArrayCopy = (input) => {
       if (ArrayBuffer.isView(input)) {
         const view = input;
@@ -73549,16 +72850,6 @@ var IssueAttachments = class {
       const copy = new Uint8Array(src.byteLength);
       copy.set(src);
       return copy;
-    };
-    const mergeChunks = (chunks) => {
-      const totalLength = chunks.reduce((sum, c) => sum + c.byteLength, 0);
-      const merged = new Uint8Array(totalLength);
-      let offset2 = 0;
-      for (const c of chunks) {
-        merged.set(c, offset2);
-        offset2 += c.byteLength;
-      }
-      return merged;
     };
     const mimeType = attachment.mimeType ?? (import_mime_types.default.lookup(attachment.filename) || void 0);
     if (attachment.file instanceof Blob || attachment.file instanceof File) {
@@ -73624,7 +72915,113 @@ var IssueAttachments = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueCommentProperties.mjs
+// node_modules/jira.js/dist/esm/version3/issueBulkOperations.mjs
+var IssueBulkOperations = class {
+  client;
+  constructor(client) {
+    this.client = client;
+  }
+  async submitBulkDelete(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/bulk/issues/delete",
+      method: "POST",
+      data: {
+        selectedIssueIdsOrKeys: parameters.selectedIssueIdsOrKeys,
+        sendBulkNotification: parameters.sendBulkNotification
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async getBulkEditableFields(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/bulk/issues/fields",
+      method: "GET",
+      params: {
+        issueIdsOrKeys: parameters.issueIdsOrKeys,
+        searchText: parameters.searchText,
+        endingBefore: parameters.endingBefore,
+        startingAfter: parameters.startingAfter
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async submitBulkEdit(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/bulk/issues/fields",
+      method: "POST",
+      data: {
+        editedFieldsInput: parameters.editedFieldsInput,
+        selectedActions: parameters.selectedActions,
+        selectedIssueIdsOrKeys: parameters.selectedIssueIdsOrKeys,
+        sendBulkNotification: parameters.sendBulkNotification
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async submitBulkMove(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/bulk/issues/move",
+      method: "POST",
+      data: {
+        sendBulkNotification: parameters.sendBulkNotification,
+        targetToSourcesMapping: parameters.targetToSourcesMapping
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async getAvailableTransitions(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/bulk/issues/transition",
+      method: "GET",
+      params: {
+        issueIdsOrKeys: parameters.issueIdsOrKeys,
+        endingBefore: parameters.endingBefore,
+        startingAfter: parameters.startingAfter
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async submitBulkTransition(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/bulk/issues/transition",
+      method: "POST",
+      data: {
+        bulkTransitionInputs: parameters.bulkTransitionInputs,
+        sendBulkNotification: parameters.sendBulkNotification
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async submitBulkUnwatch(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/bulk/issues/unwatch",
+      method: "POST",
+      data: {
+        selectedIssueIdsOrKeys: parameters.selectedIssueIdsOrKeys
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async submitBulkWatch(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/bulk/issues/watch",
+      method: "POST",
+      data: {
+        selectedIssueIdsOrKeys: parameters.selectedIssueIdsOrKeys
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async getBulkOperationProgress(parameters, callback) {
+    const config3 = {
+      url: `/rest/api/3/bulk/queue/${parameters.taskId}`,
+      method: "GET"
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+};
+
+// node_modules/jira.js/dist/esm/version3/issueCommentProperties.mjs
 var IssueCommentProperties = class {
   client;
   constructor(client) {
@@ -73633,21 +73030,21 @@ var IssueCommentProperties = class {
   async getCommentPropertyKeys(parameters, callback) {
     const commentId = typeof parameters === "string" ? parameters : parameters.commentId;
     const config3 = {
-      url: `/rest/api/2/comment/${commentId}/properties`,
+      url: `/rest/api/3/comment/${commentId}/properties`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getCommentProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/comment/${parameters.commentId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/comment/${parameters.commentId}/properties/${parameters.propertyKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setCommentProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/comment/${parameters.commentId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/comment/${parameters.commentId}/properties/${parameters.propertyKey}`,
       method: "PUT",
       data: parameters.property
     };
@@ -73655,14 +73052,14 @@ var IssueCommentProperties = class {
   }
   async deleteCommentProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/comment/${parameters.commentId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/comment/${parameters.commentId}/properties/${parameters.propertyKey}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueComments.mjs
+// node_modules/jira.js/dist/esm/version3/issueComments.mjs
 var IssueComments = class {
   client;
   constructor(client) {
@@ -73670,7 +73067,7 @@ var IssueComments = class {
   }
   async getCommentsByIds(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/comment/list",
+      url: "/rest/api/3/comment/list",
       method: "POST",
       params: {
         expand: parameters.expand
@@ -73684,7 +73081,7 @@ var IssueComments = class {
   async getComments(parameters, callback) {
     const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/comment`,
+      url: `/rest/api/3/issue/${issueIdOrKey}/comment`,
       method: "GET",
       params: {
         startAt: typeof parameters !== "string" && parameters.startAt,
@@ -73696,15 +73093,25 @@ var IssueComments = class {
     return this.client.sendRequest(config3, callback);
   }
   async addComment(parameters, callback) {
+    const body = typeof parameters.comment === "string" ? {
+      type: "doc",
+      version: 1,
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: parameters.comment }]
+        }
+      ]
+    } : parameters.comment;
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/comment`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/comment`,
       method: "POST",
       params: {
         expand: parameters.expand
       },
       data: {
         author: parameters.author,
-        body: parameters.comment,
+        body,
         created: parameters.created,
         id: parameters.id,
         jsdAuthorCanSeeRequest: parameters.jsdAuthorCanSeeRequest,
@@ -73722,7 +73129,7 @@ var IssueComments = class {
   }
   async getComment(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/comment/${parameters.id}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/comment/${parameters.id}`,
       method: "GET",
       params: {
         expand: parameters.expand
@@ -73731,8 +73138,18 @@ var IssueComments = class {
     return this.client.sendRequest(config3, callback);
   }
   async updateComment(parameters, callback) {
+    const body = typeof parameters.body === "string" ? {
+      type: "doc",
+      version: 1,
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: parameters.body }]
+        }
+      ]
+    } : parameters.body;
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/comment/${parameters.id}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/comment/${parameters.id}`,
       method: "PUT",
       params: {
         notifyUsers: parameters.notifyUsers,
@@ -73740,7 +73157,7 @@ var IssueComments = class {
         expand: parameters.expand
       },
       data: {
-        body: parameters.comment,
+        body,
         visibility: parameters.visibility,
         properties: parameters.properties
       }
@@ -73749,7 +73166,7 @@ var IssueComments = class {
   }
   async deleteComment(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/comment/${parameters.id}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/comment/${parameters.id}`,
       method: "DELETE",
       params: {
         parentId: parameters.parentId
@@ -73759,7 +73176,7 @@ var IssueComments = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueCustomFieldAssociations.mjs
+// node_modules/jira.js/dist/esm/version3/issueCustomFieldAssociations.mjs
 var IssueCustomFieldAssociations = class {
   client;
   constructor(client) {
@@ -73767,29 +73184,29 @@ var IssueCustomFieldAssociations = class {
   }
   async createAssociations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/field/association",
+      url: "/rest/api/3/field/association",
       method: "PUT",
       data: {
-        associationContexts: parameters?.associationContexts,
-        fields: parameters?.fields
+        associationContexts: parameters.associationContexts,
+        fields: parameters.fields
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async removeAssociations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/field/association",
+      url: "/rest/api/3/field/association",
       method: "DELETE",
       data: {
-        associationContexts: parameters?.associationContexts,
-        fields: parameters?.fields
+        associationContexts: parameters.associationContexts,
+        fields: parameters.fields
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueCustomFieldConfigurationApps.mjs
+// node_modules/jira.js/dist/esm/version3/issueCustomFieldConfigurationApps.mjs
 var IssueCustomFieldConfigurationApps = class {
   client;
   constructor(client) {
@@ -73797,11 +73214,11 @@ var IssueCustomFieldConfigurationApps = class {
   }
   async getCustomFieldsConfigurations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/app/field/context/configuration/list",
+      url: "/rest/api/3/app/field/context/configuration/list",
       method: "POST",
       params: {
         id: parameters?.id,
-        fieldContextId: parameters?.fieldContextId,
+        fieldContextId: paramSerializer("fieldContextId", parameters?.fieldContextId),
         issueId: parameters?.issueId,
         projectKeyOrId: parameters?.projectKeyOrId,
         issueTypeId: parameters?.issueTypeId,
@@ -73815,24 +73232,25 @@ var IssueCustomFieldConfigurationApps = class {
     return this.client.sendRequest(config3, callback);
   }
   async getCustomFieldConfiguration(parameters, callback) {
+    const fieldIdOrKey = typeof parameters === "string" ? parameters : parameters.fieldIdOrKey;
     const config3 = {
-      url: `/rest/api/2/app/field/${parameters.fieldIdOrKey}/context/configuration`,
+      url: `/rest/api/3/app/field/${fieldIdOrKey}/context/configuration`,
       method: "GET",
       params: {
-        id: parameters.id,
-        fieldContextId: parameters.fieldContextId,
-        issueId: parameters.issueId,
-        projectKeyOrId: parameters.projectKeyOrId,
-        issueTypeId: parameters.issueTypeId,
-        startAt: parameters.startAt,
-        maxResults: parameters.maxResults
+        id: typeof parameters !== "string" && parameters.id,
+        fieldContextId: typeof parameters !== "string" && parameters.fieldContextId,
+        issueId: typeof parameters !== "string" && parameters.issueId,
+        projectKeyOrId: typeof parameters !== "string" && parameters.projectKeyOrId,
+        issueTypeId: typeof parameters !== "string" && parameters.issueTypeId,
+        startAt: typeof parameters !== "string" && parameters.startAt,
+        maxResults: typeof parameters !== "string" && parameters.maxResults
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateCustomFieldConfiguration(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/app/field/${parameters.fieldIdOrKey}/context/configuration`,
+      url: `/rest/api/3/app/field/${parameters.fieldIdOrKey}/context/configuration`,
       method: "PUT",
       data: {
         configurations: parameters.configurations
@@ -73842,7 +73260,7 @@ var IssueCustomFieldConfigurationApps = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueCustomFieldContexts.mjs
+// node_modules/jira.js/dist/esm/version3/issueCustomFieldContexts.mjs
 var IssueCustomFieldContexts = class {
   client;
   constructor(client) {
@@ -73851,7 +73269,7 @@ var IssueCustomFieldContexts = class {
   async getContextsForField(parameters, callback) {
     const fieldId = typeof parameters === "string" ? parameters : parameters.fieldId;
     const config3 = {
-      url: `/rest/api/2/field/${fieldId}/context`,
+      url: `/rest/api/3/field/${fieldId}/context`,
       method: "GET",
       params: {
         isAnyIssueType: typeof parameters !== "string" && parameters.isAnyIssueType,
@@ -73865,7 +73283,7 @@ var IssueCustomFieldContexts = class {
   }
   async createCustomFieldContext(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context`,
       method: "POST",
       data: {
         description: parameters.description,
@@ -73880,7 +73298,7 @@ var IssueCustomFieldContexts = class {
   async getDefaultValues(parameters, callback) {
     const fieldId = typeof parameters === "string" ? parameters : parameters.fieldId;
     const config3 = {
-      url: `/rest/api/2/field/${fieldId}/context/defaultValue`,
+      url: `/rest/api/3/field/${fieldId}/context/defaultValue`,
       method: "GET",
       params: {
         contextId: typeof parameters !== "string" && parameters.contextId,
@@ -73892,7 +73310,7 @@ var IssueCustomFieldContexts = class {
   }
   async setDefaultValues(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/defaultValue`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/defaultValue`,
       method: "PUT",
       data: {
         defaultValues: parameters.defaultValues
@@ -73903,7 +73321,7 @@ var IssueCustomFieldContexts = class {
   async getIssueTypeMappingsForContexts(parameters, callback) {
     const fieldId = typeof parameters === "string" ? parameters : parameters.fieldId;
     const config3 = {
-      url: `/rest/api/2/field/${fieldId}/context/issuetypemapping`,
+      url: `/rest/api/3/field/${fieldId}/context/issuetypemapping`,
       method: "GET",
       params: {
         contextId: typeof parameters !== "string" && parameters.contextId,
@@ -73915,7 +73333,7 @@ var IssueCustomFieldContexts = class {
   }
   async getCustomFieldContextsForProjectsAndIssueTypes(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/mapping`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/mapping`,
       method: "POST",
       params: {
         startAt: parameters.startAt,
@@ -73930,7 +73348,7 @@ var IssueCustomFieldContexts = class {
   async getProjectContextMapping(parameters, callback) {
     const fieldId = typeof parameters === "string" ? parameters : parameters.fieldId;
     const config3 = {
-      url: `/rest/api/2/field/${fieldId}/context/projectmapping`,
+      url: `/rest/api/3/field/${fieldId}/context/projectmapping`,
       method: "GET",
       params: {
         contextId: typeof parameters !== "string" && parameters.contextId,
@@ -73942,7 +73360,7 @@ var IssueCustomFieldContexts = class {
   }
   async updateCustomFieldContext(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}`,
       method: "PUT",
       data: {
         description: parameters.description,
@@ -73953,14 +73371,14 @@ var IssueCustomFieldContexts = class {
   }
   async deleteCustomFieldContext(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async addIssueTypesToContext(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/issuetype`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/issuetype`,
       method: "PUT",
       data: {
         issueTypeIds: parameters.issueTypeIds
@@ -73970,7 +73388,7 @@ var IssueCustomFieldContexts = class {
   }
   async removeIssueTypesFromContext(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/issuetype/remove`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/issuetype/remove`,
       method: "POST",
       data: {
         issueTypeIds: parameters.issueTypeIds
@@ -73980,7 +73398,7 @@ var IssueCustomFieldContexts = class {
   }
   async assignProjectsToCustomFieldContext(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/project`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/project`,
       method: "PUT",
       data: {
         projectIds: parameters.projectIds
@@ -73990,7 +73408,7 @@ var IssueCustomFieldContexts = class {
   }
   async removeCustomFieldContextFromProjects(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/project/remove`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/project/remove`,
       method: "POST",
       data: {
         projectIds: parameters.projectIds
@@ -74000,7 +73418,7 @@ var IssueCustomFieldContexts = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueCustomFieldOptions.mjs
+// node_modules/jira.js/dist/esm/version3/issueCustomFieldOptions.mjs
 var IssueCustomFieldOptions = class {
   client;
   constructor(client) {
@@ -74009,14 +73427,14 @@ var IssueCustomFieldOptions = class {
   async getCustomFieldOption(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/customFieldOption/${id}`,
+      url: `/rest/api/3/customFieldOption/${id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getOptionsForContext(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/option`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/option`,
       method: "GET",
       params: {
         optionId: parameters.optionId,
@@ -74029,7 +73447,7 @@ var IssueCustomFieldOptions = class {
   }
   async createCustomFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/option`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/option`,
       method: "POST",
       data: {
         options: parameters.options
@@ -74039,7 +73457,7 @@ var IssueCustomFieldOptions = class {
   }
   async updateCustomFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/option`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/option`,
       method: "PUT",
       data: {
         options: parameters.options
@@ -74049,7 +73467,7 @@ var IssueCustomFieldOptions = class {
   }
   async reorderCustomFieldOptions(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/option/move`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/option/move`,
       method: "PUT",
       data: {
         after: parameters.after,
@@ -74061,14 +73479,14 @@ var IssueCustomFieldOptions = class {
   }
   async deleteCustomFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/option/${parameters.optionId}`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/option/${parameters.optionId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async replaceCustomFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}/context/${parameters.contextId}/option/${parameters.optionId}/issue`,
+      url: `/rest/api/3/field/${parameters.fieldId}/context/${parameters.contextId}/option/${parameters.optionId}/issue`,
       method: "DELETE",
       params: {
         replaceWith: parameters.replaceWith,
@@ -74079,7 +73497,7 @@ var IssueCustomFieldOptions = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueCustomFieldOptionsApps.mjs
+// node_modules/jira.js/dist/esm/version3/issueCustomFieldOptionsApps.mjs
 var IssueCustomFieldOptionsApps = class {
   client;
   constructor(client) {
@@ -74088,7 +73506,7 @@ var IssueCustomFieldOptionsApps = class {
   async getAllIssueFieldOptions(parameters, callback) {
     const fieldKey = typeof parameters === "string" ? parameters : parameters.fieldKey;
     const config3 = {
-      url: `/rest/api/2/field/${fieldKey}/option`,
+      url: `/rest/api/3/field/${fieldKey}/option`,
       method: "GET",
       params: {
         startAt: typeof parameters !== "string" && parameters.startAt,
@@ -74099,7 +73517,7 @@ var IssueCustomFieldOptionsApps = class {
   }
   async createIssueFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldKey}/option`,
+      url: `/rest/api/3/field/${parameters.fieldKey}/option`,
       method: "POST",
       data: {
         config: parameters.config,
@@ -74112,7 +73530,7 @@ var IssueCustomFieldOptionsApps = class {
   async getSelectableIssueFieldOptions(parameters, callback) {
     const fieldKey = typeof parameters === "string" ? parameters : parameters.fieldKey;
     const config3 = {
-      url: `/rest/api/2/field/${fieldKey}/option/suggestions/edit`,
+      url: `/rest/api/3/field/${fieldKey}/option/suggestions/edit`,
       method: "GET",
       params: {
         startAt: typeof parameters !== "string" && parameters.startAt,
@@ -74125,7 +73543,7 @@ var IssueCustomFieldOptionsApps = class {
   async getVisibleIssueFieldOptions(parameters, callback) {
     const fieldKey = typeof parameters === "string" ? parameters : parameters.fieldKey;
     const config3 = {
-      url: `/rest/api/2/field/${fieldKey}/option/suggestions/search`,
+      url: `/rest/api/3/field/${fieldKey}/option/suggestions/search`,
       method: "GET",
       params: {
         startAt: typeof parameters !== "string" && parameters.startAt,
@@ -74137,14 +73555,14 @@ var IssueCustomFieldOptionsApps = class {
   }
   async getIssueFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldKey}/option/${parameters.optionId}`,
+      url: `/rest/api/3/field/${parameters.fieldKey}/option/${parameters.optionId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateIssueFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldKey}/option/${parameters.optionId}`,
+      url: `/rest/api/3/field/${parameters.fieldKey}/option/${parameters.optionId}`,
       method: "PUT",
       data: {
         config: parameters.config,
@@ -74157,14 +73575,14 @@ var IssueCustomFieldOptionsApps = class {
   }
   async deleteIssueFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldKey}/option/${parameters.optionId}`,
+      url: `/rest/api/3/field/${parameters.fieldKey}/option/${parameters.optionId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async replaceIssueFieldOption(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldKey}/option/${parameters.optionId}/issue`,
+      url: `/rest/api/3/field/${parameters.fieldKey}/option/${parameters.optionId}/issue`,
       method: "DELETE",
       params: {
         replaceWith: parameters.replaceWith,
@@ -74177,7 +73595,7 @@ var IssueCustomFieldOptionsApps = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueCustomFieldValuesApps.mjs
+// node_modules/jira.js/dist/esm/version3/issueCustomFieldValuesApps.mjs
 var IssueCustomFieldValuesApps = class {
   client;
   constructor(client) {
@@ -74185,7 +73603,7 @@ var IssueCustomFieldValuesApps = class {
   }
   async updateMultipleCustomFieldValues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/app/field/value",
+      url: "/rest/api/3/app/field/value",
       method: "POST",
       params: {
         generateChangelog: parameters.generateChangelog
@@ -74198,7 +73616,7 @@ var IssueCustomFieldValuesApps = class {
   }
   async updateCustomFieldValue(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/app/field/${parameters.fieldIdOrKey}/value`,
+      url: `/rest/api/3/app/field/${parameters.fieldIdOrKey}/value`,
       method: "PUT",
       params: {
         generateChangelog: parameters.generateChangelog
@@ -74211,7 +73629,7 @@ var IssueCustomFieldValuesApps = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueFieldConfigurations.mjs
+// node_modules/jira.js/dist/esm/version3/issueFieldConfigurations.mjs
 var IssueFieldConfigurations = class {
   client;
   constructor(client) {
@@ -74219,7 +73637,7 @@ var IssueFieldConfigurations = class {
   }
   async getAllFieldConfigurations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/fieldconfiguration",
+      url: "/rest/api/3/fieldconfiguration",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -74233,49 +73651,47 @@ var IssueFieldConfigurations = class {
   }
   async createFieldConfiguration(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/fieldconfiguration",
+      url: "/rest/api/3/fieldconfiguration",
       method: "POST",
       data: {
-        name: parameters.name,
-        description: parameters.description
+        description: parameters.description,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateFieldConfiguration(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/fieldconfiguration/${parameters.id}`,
+      url: `/rest/api/3/fieldconfiguration/${parameters.id}`,
       method: "PUT",
       data: {
-        name: parameters.name,
-        description: parameters.description
+        description: parameters.description,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteFieldConfiguration(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/fieldconfiguration/${id}`,
+      url: `/rest/api/3/fieldconfiguration/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getFieldConfigurationItems(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/fieldconfiguration/${id}/fields`,
+      url: `/rest/api/3/fieldconfiguration/${parameters.id}/fields`,
       method: "GET",
       params: {
-        startAt: typeof parameters !== "string" && parameters.startAt,
-        maxResults: typeof parameters !== "string" && parameters.maxResults
+        startAt: parameters.startAt,
+        maxResults: parameters.maxResults
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateFieldConfigurationItems(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/fieldconfiguration/${parameters.id}/fields`,
+      url: `/rest/api/3/fieldconfiguration/${parameters.id}/fields`,
       method: "PUT",
       data: {
         fieldConfigurationItems: parameters.fieldConfigurationItems
@@ -74285,7 +73701,7 @@ var IssueFieldConfigurations = class {
   }
   async getAllFieldConfigurationSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/fieldconfigurationscheme",
+      url: "/rest/api/3/fieldconfigurationscheme",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -74297,18 +73713,18 @@ var IssueFieldConfigurations = class {
   }
   async createFieldConfigurationScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/fieldconfigurationscheme",
+      url: "/rest/api/3/fieldconfigurationscheme",
       method: "POST",
       data: {
-        name: parameters.name,
-        description: parameters.description
+        description: parameters.description,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getFieldConfigurationSchemeMappings(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/fieldconfigurationscheme/mapping",
+      url: "/rest/api/3/fieldconfigurationscheme/mapping",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -74320,7 +73736,7 @@ var IssueFieldConfigurations = class {
   }
   async getFieldConfigurationSchemeProjectMapping(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/fieldconfigurationscheme/project",
+      url: "/rest/api/3/fieldconfigurationscheme/project",
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -74332,37 +73748,36 @@ var IssueFieldConfigurations = class {
   }
   async assignFieldConfigurationSchemeToProject(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/fieldconfigurationscheme/project",
+      url: "/rest/api/3/fieldconfigurationscheme/project",
       method: "PUT",
       data: {
-        fieldConfigurationSchemeId: parameters.fieldConfigurationSchemeId,
-        projectId: parameters.projectId
+        fieldConfigurationSchemeId: parameters?.fieldConfigurationSchemeId,
+        projectId: parameters?.projectId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateFieldConfigurationScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/fieldconfigurationscheme/${parameters.id}`,
+      url: `/rest/api/3/fieldconfigurationscheme/${parameters.id}`,
       method: "PUT",
       data: {
-        name: parameters.name,
-        description: parameters.description
+        description: parameters.description,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteFieldConfigurationScheme(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/fieldconfigurationscheme/${id}`,
+      url: `/rest/api/3/fieldconfigurationscheme/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setFieldConfigurationSchemeMapping(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/fieldconfigurationscheme/${parameters.id}/mapping`,
+      url: `/rest/api/3/fieldconfigurationscheme/${parameters.id}/mapping`,
       method: "PUT",
       data: {
         mappings: parameters.mappings
@@ -74372,7 +73787,7 @@ var IssueFieldConfigurations = class {
   }
   async removeIssueTypesFromGlobalFieldConfigurationScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/fieldconfigurationscheme/${parameters.id}/mapping/delete`,
+      url: `/rest/api/3/fieldconfigurationscheme/${parameters.id}/mapping/delete`,
       method: "POST",
       data: {
         issueTypeIds: parameters.issueTypeIds
@@ -74382,7 +73797,7 @@ var IssueFieldConfigurations = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueFields.mjs
+// node_modules/jira.js/dist/esm/version3/issueFields.mjs
 var IssueFields = class {
   client;
   constructor(client) {
@@ -74390,27 +73805,27 @@ var IssueFields = class {
   }
   async getFields(callback) {
     const config3 = {
-      url: "/rest/api/2/field",
+      url: "/rest/api/3/field",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createCustomField(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/field",
+      url: "/rest/api/3/field",
       method: "POST",
       data: {
-        description: parameters?.description,
-        name: parameters?.name,
-        searcherKey: parameters?.searcherKey,
-        type: parameters?.type
+        description: parameters.description,
+        name: parameters.name,
+        searcherKey: parameters.searcherKey,
+        type: parameters.type
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getFieldsPaginated(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/field/search",
+      url: "/rest/api/3/field/search",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -74427,7 +73842,7 @@ var IssueFields = class {
   }
   async getTrashedFieldsPaginated(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/field/search/trashed",
+      url: "/rest/api/3/field/search/trashed",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -74442,7 +73857,7 @@ var IssueFields = class {
   }
   async updateCustomField(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.fieldId}`,
+      url: `/rest/api/3/field/${parameters.fieldId}`,
       method: "PUT",
       data: {
         description: parameters.description,
@@ -74454,28 +73869,28 @@ var IssueFields = class {
   }
   async deleteCustomField(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.id}`,
+      url: `/rest/api/3/field/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async restoreCustomField(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.id}/restore`,
+      url: `/rest/api/3/field/${parameters.id}/restore`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
   }
   async trashCustomField(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/field/${parameters.id}/trash`,
+      url: `/rest/api/3/field/${parameters.id}/trash`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getProjectFields(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/projects/fields",
+      url: "/rest/api/3/projects/fields",
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -74489,7 +73904,7 @@ var IssueFields = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueLinks.mjs
+// node_modules/jira.js/dist/esm/version3/issueLinks.mjs
 var IssueLinks = class {
   client;
   constructor(client) {
@@ -74497,36 +73912,34 @@ var IssueLinks = class {
   }
   async linkIssues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issueLink",
+      url: "/rest/api/3/issueLink",
       method: "POST",
       data: {
-        type: parameters.type,
+        comment: parameters.comment,
         inwardIssue: parameters.inwardIssue,
         outwardIssue: parameters.outwardIssue,
-        comment: parameters.comment
+        type: parameters.type
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getIssueLink(parameters, callback) {
-    const linkId = typeof parameters === "string" ? parameters : parameters.linkId;
     const config3 = {
-      url: `/rest/api/2/issueLink/${linkId}`,
+      url: `/rest/api/3/issueLink/${parameters.linkId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteIssueLink(parameters, callback) {
-    const linkId = typeof parameters === "string" ? parameters : parameters.linkId;
     const config3 = {
-      url: `/rest/api/2/issueLink/${linkId}`,
+      url: `/rest/api/3/issueLink/${parameters.linkId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueLinkTypes.mjs
+// node_modules/jira.js/dist/esm/version3/issueLinkTypes.mjs
 var IssueLinkTypes = class {
   client;
   constructor(client) {
@@ -74534,14 +73947,14 @@ var IssueLinkTypes = class {
   }
   async getIssueLinkTypes(callback) {
     const config3 = {
-      url: "/rest/api/2/issueLinkType",
+      url: "/rest/api/3/issueLinkType",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createIssueLinkType(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issueLinkType",
+      url: "/rest/api/3/issueLinkType",
       method: "POST",
       data: {
         id: parameters.id,
@@ -74554,16 +73967,15 @@ var IssueLinkTypes = class {
     return this.client.sendRequest(config3, callback);
   }
   async getIssueLinkType(parameters, callback) {
-    const issueLinkTypeId = typeof parameters === "string" ? parameters : parameters.issueLinkTypeId;
     const config3 = {
-      url: `/rest/api/2/issueLinkType/${issueLinkTypeId}`,
+      url: `/rest/api/3/issueLinkType/${parameters.issueLinkTypeId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateIssueLinkType(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issueLinkType/${parameters.issueLinkTypeId}`,
+      url: `/rest/api/3/issueLinkType/${parameters.issueLinkTypeId}`,
       method: "PUT",
       data: {
         id: parameters.id,
@@ -74576,16 +73988,15 @@ var IssueLinkTypes = class {
     return this.client.sendRequest(config3, callback);
   }
   async deleteIssueLinkType(parameters, callback) {
-    const issueLinkTypeId = typeof parameters === "string" ? parameters : parameters.issueLinkTypeId;
     const config3 = {
-      url: `/rest/api/2/issueLinkType/${issueLinkTypeId}`,
+      url: `/rest/api/3/issueLinkType/${parameters.issueLinkTypeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueNavigatorSettings.mjs
+// node_modules/jira.js/dist/esm/version3/issueNavigatorSettings.mjs
 var IssueNavigatorSettings = class {
   client;
   constructor(client) {
@@ -74593,21 +74004,21 @@ var IssueNavigatorSettings = class {
   }
   async getIssueNavigatorDefaultColumns(callback) {
     const config3 = {
-      url: "/rest/api/2/settings/columns",
+      url: "/rest/api/3/settings/columns",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setIssueNavigatorDefaultColumns(callback) {
     const config3 = {
-      url: "/rest/api/2/settings/columns",
+      url: "/rest/api/3/settings/columns",
       method: "PUT"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueNotificationSchemes.mjs
+// node_modules/jira.js/dist/esm/version3/issueNotificationSchemes.mjs
 var IssueNotificationSchemes = class {
   client;
   constructor(client) {
@@ -74615,7 +74026,7 @@ var IssueNotificationSchemes = class {
   }
   async getNotificationSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/notificationscheme",
+      url: "/rest/api/3/notificationscheme",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -74630,7 +74041,7 @@ var IssueNotificationSchemes = class {
   }
   async createNotificationScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/notificationscheme",
+      url: "/rest/api/3/notificationscheme",
       method: "POST",
       data: {
         description: parameters.description,
@@ -74642,7 +74053,7 @@ var IssueNotificationSchemes = class {
   }
   async getNotificationSchemeToProjectMappings(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/notificationscheme/project",
+      url: "/rest/api/3/notificationscheme/project",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -74656,7 +74067,7 @@ var IssueNotificationSchemes = class {
   async getNotificationScheme(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/notificationscheme/${id}`,
+      url: `/rest/api/3/notificationscheme/${id}`,
       method: "GET",
       params: {
         expand: typeof parameters !== "string" && parameters.expand
@@ -74666,7 +74077,7 @@ var IssueNotificationSchemes = class {
   }
   async updateNotificationScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/notificationscheme/${parameters.id}`,
+      url: `/rest/api/3/notificationscheme/${parameters.id}`,
       method: "PUT",
       data: {
         description: parameters.description,
@@ -74677,7 +74088,7 @@ var IssueNotificationSchemes = class {
   }
   async addNotifications(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/notificationscheme/${parameters.id}/notification`,
+      url: `/rest/api/3/notificationscheme/${parameters.id}/notification`,
       method: "PUT",
       data: {
         notificationSchemeEvents: parameters.notificationSchemeEvents
@@ -74687,21 +74098,21 @@ var IssueNotificationSchemes = class {
   }
   async deleteNotificationScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/notificationscheme/${parameters.notificationSchemeId}`,
+      url: `/rest/api/3/notificationscheme/${parameters.notificationSchemeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async removeNotificationFromNotificationScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/notificationscheme/${parameters.notificationSchemeId}/notification/${parameters.notificationId}`,
+      url: `/rest/api/3/notificationscheme/${parameters.notificationSchemeId}/notification/${parameters.notificationId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issuePriorities.mjs
+// node_modules/jira.js/dist/esm/version3/issuePriorities.mjs
 var IssuePriorities = class {
   client;
   constructor(client) {
@@ -74709,14 +74120,14 @@ var IssuePriorities = class {
   }
   async getPriorities(callback) {
     const config3 = {
-      url: "/rest/api/2/priority",
+      url: "/rest/api/3/priority",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createPriority(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/priority",
+      url: "/rest/api/3/priority",
       method: "POST",
       data: {
         avatarId: parameters.avatarId,
@@ -74730,7 +74141,7 @@ var IssuePriorities = class {
   }
   async setDefaultPriority(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/priority/default",
+      url: "/rest/api/3/priority/default",
       method: "PUT",
       data: {
         id: parameters?.id
@@ -74740,7 +74151,7 @@ var IssuePriorities = class {
   }
   async movePriorities(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/priority/move",
+      url: "/rest/api/3/priority/move",
       method: "PUT",
       data: {
         after: parameters.after,
@@ -74752,7 +74163,7 @@ var IssuePriorities = class {
   }
   async searchPriorities(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/priority/search",
+      url: "/rest/api/3/priority/search",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -74767,16 +74178,15 @@ var IssuePriorities = class {
     return this.client.sendRequest(config3, callback);
   }
   async getPriority(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/priority/${id}`,
+      url: `/rest/api/3/priority/${parameters.id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updatePriority(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/priority/${parameters.id}`,
+      url: `/rest/api/3/priority/${parameters.id}`,
       method: "PUT",
       data: {
         avatarId: parameters.avatarId,
@@ -74790,14 +74200,14 @@ var IssuePriorities = class {
   }
   async deletePriority(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/priority/${parameters.id}`,
+      url: `/rest/api/3/priority/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueProperties.mjs
+// node_modules/jira.js/dist/esm/version3/issueProperties.mjs
 var IssueProperties = class {
   client;
   constructor(client) {
@@ -74805,7 +74215,7 @@ var IssueProperties = class {
   }
   async bulkSetIssuesProperties(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/properties",
+      url: "/rest/api/3/issue/properties",
       method: "POST",
       data: {
         entitiesIds: parameters?.entitiesIds,
@@ -74816,7 +74226,7 @@ var IssueProperties = class {
   }
   async bulkSetIssuePropertiesByIssue(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/properties/multi",
+      url: "/rest/api/3/issue/properties/multi",
       method: "POST",
       data: {
         issues: parameters?.issues
@@ -74826,45 +74236,44 @@ var IssueProperties = class {
   }
   async bulkSetIssueProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issue/properties/${parameters.propertyKey}`,
       method: "PUT",
       data: {
-        value: parameters.value,
         expression: parameters.expression,
-        filter: parameters.filter
+        filter: parameters.filter,
+        value: parameters.value
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async bulkDeleteIssueProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issue/properties/${parameters.propertyKey}`,
       method: "DELETE",
       data: {
-        entityIds: parameters.entityIds,
-        currentValue: parameters.currentValue
+        currentValue: parameters.currentValue,
+        entityIds: parameters.entityIds
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getIssuePropertyKeys(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/properties`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/properties`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getIssueProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/properties/${parameters.propertyKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setIssueProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/properties/${parameters.propertyKey}`,
       method: "PUT",
       data: parameters.propertyValue
     };
@@ -74872,14 +74281,14 @@ var IssueProperties = class {
   }
   async deleteIssueProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/properties/${parameters.propertyKey}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueRedaction.mjs
+// node_modules/jira.js/dist/esm/version3/issueRedaction.mjs
 var IssueRedaction = class {
   client;
   constructor(client) {
@@ -74887,7 +74296,7 @@ var IssueRedaction = class {
   }
   async redact(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/redact",
+      url: "/rest/api/3/redact",
       method: "POST",
       data: {
         redactions: parameters.redactions
@@ -74897,84 +74306,82 @@ var IssueRedaction = class {
   }
   async getRedactionStatus(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/redact/status/${parameters.jobId}`,
+      url: `/rest/api/3/redact/status/${parameters.jobId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueRemoteLinks.mjs
+// node_modules/jira.js/dist/esm/version3/issueRemoteLinks.mjs
 var IssueRemoteLinks = class {
   client;
   constructor(client) {
     this.client = client;
   }
   async getRemoteIssueLinks(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/remotelink`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/remotelink`,
       method: "GET",
       params: {
-        globalId: typeof parameters !== "string" && parameters.globalId
+        globalId: parameters.globalId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async createOrUpdateRemoteIssueLink(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/remotelink`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/remotelink`,
       method: "POST",
       data: {
-        globalId: parameters.globalId,
         application: parameters.application,
-        relationship: parameters.relationship,
-        object: parameters.object
+        globalId: parameters.globalId,
+        object: parameters.object,
+        relationship: parameters.relationship
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteRemoteIssueLinkByGlobalId(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/remotelink`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/remotelink`,
       method: "DELETE",
       params: {
-        globalId: typeof parameters !== "string" && parameters.globalId
+        globalId: parameters.globalId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getRemoteIssueLinkById(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/remotelink/${parameters.linkId}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/remotelink/${parameters.linkId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateRemoteIssueLink(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/remotelink/${parameters.linkId}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/remotelink/${parameters.linkId}`,
       method: "PUT",
       data: {
-        globalId: parameters.globalId,
         application: parameters.application,
-        relationship: parameters.relationship,
-        object: parameters.object
+        globalId: parameters.globalId,
+        object: parameters.object,
+        relationship: parameters.relationship
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteRemoteIssueLinkById(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/remotelink/${parameters.linkId}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/remotelink/${parameters.linkId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueResolutions.mjs
+// node_modules/jira.js/dist/esm/version3/issueResolutions.mjs
 var IssueResolutions = class {
   client;
   constructor(client) {
@@ -74982,14 +74389,14 @@ var IssueResolutions = class {
   }
   async getResolutions(callback) {
     const config3 = {
-      url: "/rest/api/2/resolution",
+      url: "/rest/api/3/resolution",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createResolution(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/resolution",
+      url: "/rest/api/3/resolution",
       method: "POST",
       data: parameters
     };
@@ -74997,7 +74404,7 @@ var IssueResolutions = class {
   }
   async setDefaultResolution(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/resolution/default",
+      url: "/rest/api/3/resolution/default",
       method: "PUT",
       data: {
         id: parameters.id
@@ -75007,7 +74414,7 @@ var IssueResolutions = class {
   }
   async moveResolutions(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/resolution/move",
+      url: "/rest/api/3/resolution/move",
       method: "PUT",
       data: {
         after: parameters.after,
@@ -75019,7 +74426,7 @@ var IssueResolutions = class {
   }
   async searchResolutions(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/resolution/search",
+      url: "/rest/api/3/resolution/search",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -75032,18 +74439,19 @@ var IssueResolutions = class {
   }
   async getResolution(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/resolution/${parameters.id}`,
+      url: `/rest/api/3/resolution/${parameters.id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateResolution(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/resolution/${parameters.id}`,
+      url: `/rest/api/3/resolution/${parameters.id}`,
       method: "PUT",
       data: {
         ...parameters,
         name: parameters.name,
+        description: parameters.description,
         id: void 0
       }
     };
@@ -75051,7 +74459,7 @@ var IssueResolutions = class {
   }
   async deleteResolution(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/resolution/${parameters.id}`,
+      url: `/rest/api/3/resolution/${parameters.id}`,
       method: "DELETE",
       params: {
         replaceWith: parameters.replaceWith
@@ -75061,7 +74469,7 @@ var IssueResolutions = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issues.mjs
+// node_modules/jira.js/dist/esm/version3/issues.mjs
 var Issues = class {
   client;
   constructor(client) {
@@ -75069,7 +74477,7 @@ var Issues = class {
   }
   async getBulkChangelogs(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/changelog/bulkfetch",
+      url: "/rest/api/3/changelog/bulkfetch",
       method: "POST",
       data: {
         fieldIds: parameters.fieldIds,
@@ -75082,14 +74490,31 @@ var Issues = class {
   }
   async getEvents(callback) {
     const config3 = {
-      url: "/rest/api/2/events",
+      url: "/rest/api/3/events",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createIssue(parameters, callback) {
+    if (typeof parameters.fields.description === "string") {
+      parameters.fields.description = {
+        type: "doc",
+        version: 1,
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                text: parameters.fields.description,
+                type: "text"
+              }
+            ]
+          }
+        ]
+      };
+    }
     const config3 = {
-      url: "/rest/api/2/issue",
+      url: "/rest/api/3/issue",
       method: "POST",
       params: {
         updateHistory: parameters.updateHistory
@@ -75106,7 +74531,7 @@ var Issues = class {
   }
   async archiveIssuesAsync(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/archive",
+      url: "/rest/api/3/issue/archive",
       method: "POST",
       data: {
         jql: parameters.jql
@@ -75116,7 +74541,7 @@ var Issues = class {
   }
   async archiveIssues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/archive",
+      url: "/rest/api/3/issue/archive",
       method: "PUT",
       data: {
         issueIdsOrKeys: parameters.issueIdsOrKeys
@@ -75126,7 +74551,7 @@ var Issues = class {
   }
   async createIssues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/bulk",
+      url: "/rest/api/3/issue/bulk",
       method: "POST",
       data: {
         issueUpdates: parameters?.issueUpdates
@@ -75136,7 +74561,7 @@ var Issues = class {
   }
   async bulkFetchIssues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/bulkfetch",
+      url: "/rest/api/3/issue/bulkfetch",
       method: "POST",
       data: {
         expand: parameters.expand,
@@ -75150,7 +74575,7 @@ var Issues = class {
   }
   async getCreateIssueMeta(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/createmeta",
+      url: "/rest/api/3/issue/createmeta",
       method: "GET",
       params: {
         projectIds: parameters?.projectIds,
@@ -75164,7 +74589,7 @@ var Issues = class {
   }
   async getCreateIssueMetaIssueTypes(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/createmeta/${parameters.projectIdOrKey}/issuetypes`,
+      url: `/rest/api/3/issue/createmeta/${parameters.projectIdOrKey}/issuetypes`,
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -75175,7 +74600,7 @@ var Issues = class {
   }
   async getCreateIssueMetaIssueTypeId(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/createmeta/${parameters.projectIdOrKey}/issuetypes/${parameters.issueTypeId}`,
+      url: `/rest/api/3/issue/createmeta/${parameters.projectIdOrKey}/issuetypes/${parameters.issueTypeId}`,
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -75186,7 +74611,7 @@ var Issues = class {
   }
   async getIssueLimitReport(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/limit/report",
+      url: "/rest/api/3/issue/limit/report",
       method: "GET",
       params: {
         isReturningKeys: parameters?.isReturningKeys
@@ -75199,7 +74624,7 @@ var Issues = class {
   }
   async unarchiveIssues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/unarchive",
+      url: "/rest/api/3/issue/unarchive",
       method: "PUT",
       data: {
         issueIdsOrKeys: parameters.issueIdsOrKeys
@@ -75208,23 +74633,41 @@ var Issues = class {
     return this.client.sendRequest(config3, callback);
   }
   async getIssue(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}`,
       method: "GET",
       params: {
-        fields: typeof parameters !== "string" ? parameters.fields : void 0,
-        fieldsByKeys: typeof parameters !== "string" ? parameters.fieldsByKeys : void 0,
-        expand: typeof parameters !== "string" ? parameters.expand : void 0,
-        properties: typeof parameters !== "string" ? parameters.properties : void 0,
-        updateHistory: typeof parameters !== "string" ? parameters.updateHistory : void 0
+        fields: parameters.fields,
+        fieldsByKeys: parameters.fieldsByKeys,
+        expand: parameters.expand,
+        properties: parameters.properties,
+        updateHistory: parameters.updateHistory,
+        failFast: parameters.failFast
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async editIssue(parameters, callback) {
+    if (parameters.fields?.description && typeof parameters.fields.description === "string") {
+      const { fields: { description } } = await this.getIssue({ issueIdOrKey: parameters.issueIdOrKey });
+      parameters.fields.description = {
+        type: "doc",
+        version: description?.version ?? 1,
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                text: parameters.fields.description,
+                type: "text"
+              }
+            ]
+          }
+        ]
+      };
+    }
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}`,
       method: "PUT",
       params: {
         notifyUsers: parameters.notifyUsers,
@@ -75244,24 +74687,24 @@ var Issues = class {
     return this.client.sendRequest(config3, callback);
   }
   async deleteIssue(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}`,
       method: "DELETE",
       params: {
-        deleteSubtasks: typeof parameters !== "string" ? parameters.deleteSubtasks : void 0
+        deleteSubtasks: parameters.deleteSubtasks
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async assignIssue(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/assignee`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/assignee`,
       method: "PUT",
       data: {
         accountId: parameters.accountId,
         accountType: parameters.accountType,
         active: parameters.active,
+        appType: parameters.appType,
         applicationRoles: parameters.applicationRoles,
         avatarUrls: parameters.avatarUrls,
         displayName: parameters.displayName,
@@ -75278,20 +74721,19 @@ var Issues = class {
     return this.client.sendRequest(config3, callback);
   }
   async getChangeLogs(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/changelog`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/changelog`,
       method: "GET",
       params: {
-        startAt: typeof parameters !== "string" ? parameters.startAt : void 0,
-        maxResults: typeof parameters !== "string" ? parameters.maxResults : void 0
+        startAt: parameters.startAt,
+        maxResults: parameters.maxResults
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getChangeLogsByIds(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/changelog/list`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/changelog/list`,
       method: "POST",
       data: {
         changelogIds: parameters.changelogIds
@@ -75300,20 +74742,19 @@ var Issues = class {
     return this.client.sendRequest(config3, callback);
   }
   async getEditIssueMeta(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/editmeta`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/editmeta`,
       method: "GET",
       params: {
-        overrideScreenSecurity: typeof parameters !== "string" ? parameters.overrideScreenSecurity : void 0,
-        overrideEditableFlag: typeof parameters !== "string" ? parameters.overrideEditableFlag : void 0
+        overrideScreenSecurity: parameters.overrideScreenSecurity,
+        overrideEditableFlag: parameters.overrideEditableFlag
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async notify(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/notify`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/notify`,
       method: "POST",
       data: {
         htmlBody: parameters.htmlBody,
@@ -75326,23 +74767,39 @@ var Issues = class {
     return this.client.sendRequest(config3, callback);
   }
   async getTransitions(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/transitions`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/transitions`,
       method: "GET",
       params: {
-        expand: typeof parameters !== "string" ? parameters.expand : void 0,
-        transitionId: typeof parameters !== "string" ? parameters.transitionId : void 0,
-        skipRemoteOnlyCondition: typeof parameters !== "string" ? parameters.skipRemoteOnlyCondition : void 0,
-        includeUnavailableTransitions: typeof parameters !== "string" ? parameters.includeUnavailableTransitions : void 0,
-        sortByOpsBarAndStatus: typeof parameters !== "string" ? parameters.sortByOpsBarAndStatus : void 0
+        expand: parameters.expand,
+        transitionId: parameters.transitionId,
+        skipRemoteOnlyCondition: parameters.skipRemoteOnlyCondition,
+        includeUnavailableTransitions: parameters.includeUnavailableTransitions,
+        sortByOpsBarAndStatus: parameters.sortByOpsBarAndStatus
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async doTransition(parameters, callback) {
+    if (parameters.fields?.description && typeof parameters.fields.description === "string") {
+      parameters.fields.description = {
+        type: "doc",
+        version: 1,
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                text: parameters.fields.description,
+                type: "text"
+              }
+            ]
+          }
+        ]
+      };
+    }
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/transitions`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/transitions`,
       method: "POST",
       data: {
         fields: parameters.fields,
@@ -75356,21 +74813,21 @@ var Issues = class {
   }
   async exportArchivedIssues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issues/archive/export",
+      url: "/rest/api/3/issues/archive/export",
       method: "PUT",
       data: {
-        archivedBy: parameters.archivedBy,
-        archivedDateRange: parameters.archivedDateRange,
-        issueTypes: parameters.issueTypes,
-        projects: parameters.projects,
-        reporters: parameters.reporters
+        archivedBy: parameters?.archivedBy,
+        archivedDateRange: parameters?.archivedDateRange,
+        issueTypes: parameters?.issueTypes,
+        projects: parameters?.projects,
+        reporters: parameters?.reporters
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueSearch.mjs
+// node_modules/jira.js/dist/esm/version3/issueSearch.mjs
 var IssueSearch = class {
   client;
   constructor(client) {
@@ -75378,7 +74835,7 @@ var IssueSearch = class {
   }
   async getIssuePickerResource(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/picker",
+      url: "/rest/api/3/issue/picker",
       method: "GET",
       params: {
         query: parameters?.query,
@@ -75393,7 +74850,7 @@ var IssueSearch = class {
   }
   async matchIssues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/match",
+      url: "/rest/api/3/jql/match",
       method: "POST",
       data: {
         issueIds: parameters.issueIds,
@@ -75404,7 +74861,7 @@ var IssueSearch = class {
   }
   async searchForIssuesUsingJql(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/search",
+      url: "/rest/api/3/search",
       method: "GET",
       params: {
         jql: parameters.jql,
@@ -75422,7 +74879,7 @@ var IssueSearch = class {
   }
   async searchForIssuesUsingJqlPost(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/search",
+      url: "/rest/api/3/search",
       method: "POST",
       data: {
         expand: parameters?.expand,
@@ -75439,7 +74896,7 @@ var IssueSearch = class {
   }
   async countIssues(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/search/approximate-count",
+      url: "/rest/api/3/search/approximate-count",
       method: "POST",
       data: {
         jql: parameters.jql
@@ -75449,7 +74906,7 @@ var IssueSearch = class {
   }
   async searchForIssuesIds(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/search/id",
+      url: "/rest/api/3/search/id",
       method: "POST",
       data: {
         jql: parameters.jql,
@@ -75461,7 +74918,7 @@ var IssueSearch = class {
   }
   async searchForIssuesUsingJqlEnhancedSearch(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/search/jql",
+      url: "/rest/api/3/search/jql",
       method: "GET",
       params: {
         jql: parameters.jql,
@@ -75479,10 +74936,9 @@ var IssueSearch = class {
   }
   async searchForIssuesUsingJqlEnhancedSearchPost(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/search/jql",
+      url: "/rest/api/3/search/jql",
       method: "POST",
       data: {
-        // todo add deprecation notice
         expand: parameters.expand,
         fields: parameters.fields,
         fieldsByKeys: parameters.fieldsByKeys,
@@ -75497,37 +74953,35 @@ var IssueSearch = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueSecurityLevel.mjs
+// node_modules/jira.js/dist/esm/version3/issueSecurityLevel.mjs
 var IssueSecurityLevel = class {
   client;
   constructor(client) {
     this.client = client;
   }
   async getIssueSecurityLevelMembers(parameters, callback) {
-    const issueSecuritySchemeId = typeof parameters === "string" ? parameters : parameters.issueSecuritySchemeId;
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${issueSecuritySchemeId}/members`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.issueSecuritySchemeId}/members`,
       method: "GET",
       params: {
-        startAt: typeof parameters !== "string" && parameters.startAt,
-        maxResults: typeof parameters !== "string" && parameters.maxResults,
-        issueSecurityLevelId: typeof parameters !== "string" && parameters.issueSecurityLevelId,
-        expand: typeof parameters !== "string" && parameters.expand
+        startAt: parameters.startAt,
+        maxResults: parameters.maxResults,
+        issueSecurityLevelId: parameters.issueSecurityLevelId,
+        expand: parameters.expand
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getIssueSecurityLevel(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/securitylevel/${id}`,
+      url: `/rest/api/3/securitylevel/${parameters.id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueSecuritySchemes.mjs
+// node_modules/jira.js/dist/esm/version3/issueSecuritySchemes.mjs
 var IssueSecuritySchemes = class {
   client;
   constructor(client) {
@@ -75535,14 +74989,14 @@ var IssueSecuritySchemes = class {
   }
   async getIssueSecuritySchemes(callback) {
     const config3 = {
-      url: "/rest/api/2/issuesecurityschemes",
+      url: "/rest/api/3/issuesecurityschemes",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createIssueSecurityScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuesecurityschemes",
+      url: "/rest/api/3/issuesecurityschemes",
       method: "POST",
       data: {
         description: parameters.description,
@@ -75554,13 +75008,13 @@ var IssueSecuritySchemes = class {
   }
   async getSecurityLevels(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuesecurityschemes/level",
+      url: "/rest/api/3/issuesecurityschemes/level",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
         maxResults: parameters?.maxResults,
-        id: paramSerializer("id", parameters?.id),
-        schemeId: paramSerializer("schemeId", parameters?.schemeId),
+        id: parameters?.id,
+        schemeId: parameters?.schemeId,
         onlyDefault: parameters?.onlyDefault
       }
     };
@@ -75568,7 +75022,7 @@ var IssueSecuritySchemes = class {
   }
   async setDefaultLevels(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuesecurityschemes/level/default",
+      url: "/rest/api/3/issuesecurityschemes/level/default",
       method: "PUT",
       data: {
         defaultValues: parameters?.defaultValues
@@ -75578,14 +75032,14 @@ var IssueSecuritySchemes = class {
   }
   async getSecurityLevelMembers(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuesecurityschemes/level/member",
+      url: "/rest/api/3/issuesecurityschemes/level/member",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
         maxResults: parameters?.maxResults,
-        id: paramSerializer("id", parameters?.id),
-        schemeId: paramSerializer("schemeId", parameters?.schemeId),
-        levelId: paramSerializer("levelId", parameters?.levelId),
+        id: parameters?.id,
+        schemeId: parameters?.schemeId,
+        levelId: parameters?.levelId,
         expand: parameters?.expand
       }
     };
@@ -75593,7 +75047,7 @@ var IssueSecuritySchemes = class {
   }
   async searchProjectsUsingSecuritySchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuesecurityschemes/project",
+      url: "/rest/api/3/issuesecurityschemes/project",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -75606,7 +75060,7 @@ var IssueSecuritySchemes = class {
   }
   async associateSchemesToProjects(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuesecurityschemes/project",
+      url: "/rest/api/3/issuesecurityschemes/project",
       method: "PUT",
       data: {
         oldToNewSecurityLevelMappings: parameters.oldToNewSecurityLevelMappings,
@@ -75618,28 +75072,27 @@ var IssueSecuritySchemes = class {
   }
   async searchSecuritySchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuesecurityschemes/search",
+      url: "/rest/api/3/issuesecurityschemes/search",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
         maxResults: parameters?.maxResults,
-        id: paramSerializer("id", parameters?.id),
-        projectId: paramSerializer("projectId", parameters?.projectId)
+        id: parameters?.id,
+        projectId: parameters?.projectId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getIssueSecurityScheme(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${id}`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateIssueSecurityScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${parameters.id}`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.id}`,
       method: "PUT",
       data: {
         description: parameters.description,
@@ -75650,14 +75103,14 @@ var IssueSecuritySchemes = class {
   }
   async deleteSecurityScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${parameters.schemeId}`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.schemeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async addSecurityLevel(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${parameters.schemeId}/level`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.schemeId}/level`,
       method: "PUT",
       data: {
         levels: parameters.levels
@@ -75667,7 +75120,7 @@ var IssueSecuritySchemes = class {
   }
   async updateSecurityLevel(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${parameters.schemeId}/level/${parameters.levelId}`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.schemeId}/level/${parameters.levelId}`,
       method: "PUT",
       data: {
         description: parameters.description,
@@ -75678,7 +75131,7 @@ var IssueSecuritySchemes = class {
   }
   async removeLevel(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${parameters.schemeId}/level/${parameters.levelId}`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.schemeId}/level/${parameters.levelId}`,
       method: "DELETE",
       params: {
         replaceWith: parameters.replaceWith
@@ -75688,7 +75141,7 @@ var IssueSecuritySchemes = class {
   }
   async addSecurityLevelMembers(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${parameters.schemeId}/level/${parameters.levelId}/member`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.schemeId}/level/${parameters.levelId}/member`,
       method: "PUT",
       data: {
         members: parameters.members
@@ -75698,52 +75151,50 @@ var IssueSecuritySchemes = class {
   }
   async removeMemberFromSecurityLevel(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuesecurityschemes/${parameters.schemeId}/level/${parameters.levelId}/member/${parameters.memberId}`,
+      url: `/rest/api/3/issuesecurityschemes/${parameters.schemeId}/level/${parameters.levelId}/member/${parameters.memberId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueTypeProperties.mjs
+// node_modules/jira.js/dist/esm/version3/issueTypeProperties.mjs
 var IssueTypeProperties = class {
   client;
   constructor(client) {
     this.client = client;
   }
   async getIssueTypePropertyKeys(parameters, callback) {
-    const issueTypeId = typeof parameters === "string" ? parameters : parameters.issueTypeId;
     const config3 = {
-      url: `/rest/api/2/issuetype/${issueTypeId}/properties`,
+      url: `/rest/api/3/issuetype/${parameters.issueTypeId}/properties`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getIssueTypeProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetype/${parameters.issueTypeId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issuetype/${parameters.issueTypeId}/properties/${parameters.propertyKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setIssueTypeProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetype/${parameters.issueTypeId}/properties/${parameters.propertyKey}`,
-      method: "PUT",
-      data: parameters.propertyValue
+      url: `/rest/api/3/issuetype/${parameters.issueTypeId}/properties/${parameters.propertyKey}`,
+      method: "PUT"
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteIssueTypeProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetype/${parameters.issueTypeId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issuetype/${parameters.issueTypeId}/properties/${parameters.propertyKey}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueTypes.mjs
+// node_modules/jira.js/dist/esm/version3/issueTypes.mjs
 var IssueTypes = class {
   client;
   constructor(client) {
@@ -75751,18 +75202,18 @@ var IssueTypes = class {
   }
   async getIssueAllTypes(callback) {
     const config3 = {
-      url: "/rest/api/2/issuetype",
+      url: "/rest/api/3/issuetype",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createIssueType(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetype",
+      url: "/rest/api/3/issuetype",
       method: "POST",
       data: {
         description: parameters.description,
-        hierarchyLevel: parameters.hierarchyLevel,
+        hierarchyLevel: parameters.hierarchyLevel ?? 0,
         name: parameters.name
       }
     };
@@ -75770,7 +75221,7 @@ var IssueTypes = class {
   }
   async getIssueTypesForProject(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetype/project",
+      url: "/rest/api/3/issuetype/project",
       method: "GET",
       params: {
         projectId: parameters.projectId,
@@ -75780,16 +75231,15 @@ var IssueTypes = class {
     return this.client.sendRequest(config3, callback);
   }
   async getIssueType(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/issuetype/${id}`,
+      url: `/rest/api/3/issuetype/${parameters.id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateIssueType(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetype/${parameters.id}`,
+      url: `/rest/api/3/issuetype/${parameters.id}`,
       method: "PUT",
       data: {
         avatarId: parameters.avatarId,
@@ -75800,27 +75250,25 @@ var IssueTypes = class {
     return this.client.sendRequest(config3, callback);
   }
   async deleteIssueType(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/issuetype/${id}`,
+      url: `/rest/api/3/issuetype/${parameters.id}`,
       method: "DELETE",
       params: {
-        alternativeIssueTypeId: typeof parameters !== "string" ? parameters.alternativeIssueTypeId : void 0
+        alternativeIssueTypeId: parameters.alternativeIssueTypeId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getAlternativeIssueTypes(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/issuetype/${id}/alternatives`,
+      url: `/rest/api/3/issuetype/${parameters.id}/alternatives`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createIssueTypeAvatar(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetype/${parameters.id}/avatar2`,
+      url: `/rest/api/3/issuetype/${parameters.id}/avatar2`,
       method: "POST",
       headers: {
         "X-Atlassian-Token": "no-check",
@@ -75837,7 +75285,7 @@ var IssueTypes = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueTypeSchemes.mjs
+// node_modules/jira.js/dist/esm/version3/issueTypeSchemes.mjs
 var IssueTypeSchemes = class {
   client;
   constructor(client) {
@@ -75845,7 +75293,7 @@ var IssueTypeSchemes = class {
   }
   async getAllIssueTypeSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescheme",
+      url: "/rest/api/3/issuetypescheme",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -75860,20 +75308,20 @@ var IssueTypeSchemes = class {
   }
   async createIssueTypeScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescheme",
+      url: "/rest/api/3/issuetypescheme",
       method: "POST",
       data: {
-        name: parameters.name,
-        description: parameters.description,
         defaultIssueTypeId: parameters.defaultIssueTypeId,
-        issueTypeIds: parameters.issueTypeIds
+        description: parameters.description,
+        issueTypeIds: parameters.issueTypeIds,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getIssueTypeSchemesMapping(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescheme/mapping",
+      url: "/rest/api/3/issuetypescheme/mapping",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -75885,7 +75333,7 @@ var IssueTypeSchemes = class {
   }
   async getIssueTypeSchemeForProjects(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescheme/project",
+      url: "/rest/api/3/issuetypescheme/project",
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -75897,7 +75345,7 @@ var IssueTypeSchemes = class {
   }
   async assignIssueTypeSchemeToProject(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescheme/project",
+      url: "/rest/api/3/issuetypescheme/project",
       method: "PUT",
       data: {
         issueTypeSchemeId: parameters.issueTypeSchemeId,
@@ -75908,27 +75356,26 @@ var IssueTypeSchemes = class {
   }
   async updateIssueTypeScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetypescheme/${parameters.issueTypeSchemeId}`,
+      url: `/rest/api/3/issuetypescheme/${parameters.issueTypeSchemeId}`,
       method: "PUT",
       data: {
-        name: parameters.name,
+        defaultIssueTypeId: parameters.defaultIssueTypeId,
         description: parameters.description,
-        defaultIssueTypeId: parameters.defaultIssueTypeId
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteIssueTypeScheme(parameters, callback) {
-    const issueTypeSchemeId = typeof parameters === "string" ? parameters : parameters.issueTypeSchemeId;
     const config3 = {
-      url: `/rest/api/2/issuetypescheme/${issueTypeSchemeId}`,
+      url: `/rest/api/3/issuetypescheme/${parameters.issueTypeSchemeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async addIssueTypesToIssueTypeScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetypescheme/${parameters.issueTypeSchemeId}/issuetype`,
+      url: `/rest/api/3/issuetypescheme/${parameters.issueTypeSchemeId}/issuetype`,
       method: "PUT",
       data: {
         issueTypeIds: parameters.issueTypeIds
@@ -75938,11 +75385,11 @@ var IssueTypeSchemes = class {
   }
   async reorderIssueTypesInIssueTypeScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetypescheme/${parameters.issueTypeSchemeId}/issuetype/move`,
+      url: `/rest/api/3/issuetypescheme/${parameters.issueTypeSchemeId}/issuetype/move`,
       method: "PUT",
       data: {
-        issueTypeIds: parameters.issueTypeIds,
         after: parameters.after,
+        issueTypeIds: parameters.issueTypeIds,
         position: parameters.position
       }
     };
@@ -75950,14 +75397,14 @@ var IssueTypeSchemes = class {
   }
   async removeIssueTypeFromIssueTypeScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetypescheme/${parameters.issueTypeSchemeId}/issuetype/${parameters.issueTypeId}`,
+      url: `/rest/api/3/issuetypescheme/${parameters.issueTypeSchemeId}/issuetype/${parameters.issueTypeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueTypeScreenSchemes.mjs
+// node_modules/jira.js/dist/esm/version3/issueTypeScreenSchemes.mjs
 var IssueTypeScreenSchemes = class {
   client;
   constructor(client) {
@@ -75965,7 +75412,7 @@ var IssueTypeScreenSchemes = class {
   }
   async getIssueTypeScreenSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescreenscheme",
+      url: "/rest/api/3/issuetypescreenscheme",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -75980,19 +75427,19 @@ var IssueTypeScreenSchemes = class {
   }
   async createIssueTypeScreenScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescreenscheme",
+      url: "/rest/api/3/issuetypescreenscheme",
       method: "POST",
       data: {
-        name: parameters.name,
         description: parameters.description,
-        issueTypeMappings: parameters.issueTypeMappings
+        issueTypeMappings: parameters.issueTypeMappings,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getIssueTypeScreenSchemeMappings(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescreenscheme/mapping",
+      url: "/rest/api/3/issuetypescreenscheme/mapping",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -76004,7 +75451,7 @@ var IssueTypeScreenSchemes = class {
   }
   async getIssueTypeScreenSchemeProjectAssociations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescreenscheme/project",
+      url: "/rest/api/3/issuetypescreenscheme/project",
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -76016,7 +75463,7 @@ var IssueTypeScreenSchemes = class {
   }
   async assignIssueTypeScreenSchemeToProject(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issuetypescreenscheme/project",
+      url: "/rest/api/3/issuetypescreenscheme/project",
       method: "PUT",
       data: {
         issueTypeScreenSchemeId: parameters?.issueTypeScreenSchemeId,
@@ -76027,26 +75474,25 @@ var IssueTypeScreenSchemes = class {
   }
   async updateIssueTypeScreenScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}`,
+      url: `/rest/api/3/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}`,
       method: "PUT",
       data: {
-        name: parameters.name,
-        description: parameters.description
+        description: parameters.description,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteIssueTypeScreenScheme(parameters, callback) {
-    const issueTypeScreenSchemeId = typeof parameters === "string" ? parameters : parameters.issueTypeScreenSchemeId;
     const config3 = {
-      url: `/rest/api/2/issuetypescreenscheme/${issueTypeScreenSchemeId}`,
+      url: `/rest/api/3/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async appendMappingsForIssueTypeScreenScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}/mapping`,
+      url: `/rest/api/3/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}/mapping`,
       method: "PUT",
       data: {
         issueTypeMappings: parameters.issueTypeMappings
@@ -76056,7 +75502,7 @@ var IssueTypeScreenSchemes = class {
   }
   async updateDefaultScreenScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}/mapping/default`,
+      url: `/rest/api/3/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}/mapping/default`,
       method: "PUT",
       data: {
         screenSchemeId: parameters.screenSchemeId
@@ -76066,7 +75512,7 @@ var IssueTypeScreenSchemes = class {
   }
   async removeMappingsFromIssueTypeScreenScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}/mapping/remove`,
+      url: `/rest/api/3/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}/mapping/remove`,
       method: "POST",
       data: {
         issueTypeIds: parameters.issueTypeIds
@@ -76075,38 +75521,35 @@ var IssueTypeScreenSchemes = class {
     return this.client.sendRequest(config3, callback);
   }
   async getProjectsForIssueTypeScreenScheme(parameters, callback) {
-    const issueTypeScreenSchemeId = typeof parameters === "string" ? parameters : parameters.issueTypeScreenSchemeId;
     const config3 = {
-      url: `/rest/api/2/issuetypescreenscheme/${issueTypeScreenSchemeId}/project`,
+      url: `/rest/api/3/issuetypescreenscheme/${parameters.issueTypeScreenSchemeId}/project`,
       method: "GET",
       params: {
-        startAt: typeof parameters !== "string" && parameters.startAt,
-        maxResults: typeof parameters !== "string" && parameters.maxResults,
-        query: typeof parameters !== "string" && parameters.query
+        startAt: parameters.startAt,
+        maxResults: parameters.maxResults,
+        query: parameters.query
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueVotes.mjs
+// node_modules/jira.js/dist/esm/version3/issueVotes.mjs
 var IssueVotes = class {
   client;
   constructor(client) {
     this.client = client;
   }
   async getVotes(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/votes`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/votes`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async addVote(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/votes`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/votes`,
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -76115,16 +75558,15 @@ var IssueVotes = class {
     return this.client.sendRequest(config3, callback);
   }
   async removeVote(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/votes`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/votes`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueWatchers.mjs
+// node_modules/jira.js/dist/esm/version3/issueWatchers.mjs
 var IssueWatchers = class {
   client;
   constructor(client) {
@@ -76132,7 +75574,7 @@ var IssueWatchers = class {
   }
   async getIsWatchingIssueBulk(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/issue/watching",
+      url: "/rest/api/3/issue/watching",
       method: "POST",
       data: {
         issueIds: parameters?.issueIds
@@ -76141,16 +75583,15 @@ var IssueWatchers = class {
     return this.client.sendRequest(config3, callback);
   }
   async getIssueWatchers(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/watchers`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/watchers`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async addWatcher(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/watchers`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/watchers`,
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -76161,9 +75602,10 @@ var IssueWatchers = class {
   }
   async removeWatcher(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/watchers`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/watchers`,
       method: "DELETE",
       params: {
+        username: parameters.username,
         accountId: parameters.accountId
       }
     };
@@ -76171,7 +75613,7 @@ var IssueWatchers = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueWorklogProperties.mjs
+// node_modules/jira.js/dist/esm/version3/issueWorklogProperties.mjs
 var IssueWorklogProperties = class {
   client;
   constructor(client) {
@@ -76179,58 +75621,77 @@ var IssueWorklogProperties = class {
   }
   async getWorklogPropertyKeys(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog/${parameters.worklogId}/properties`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog/${parameters.worklogId}/properties`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getWorklogProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog/${parameters.worklogId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog/${parameters.worklogId}/properties/${parameters.propertyKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setWorklogProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog/${parameters.worklogId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog/${parameters.worklogId}/properties/${parameters.propertyKey}`,
       method: "PUT"
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteWorklogProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog/${parameters.worklogId}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog/${parameters.worklogId}/properties/${parameters.propertyKey}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/issueWorklogs.mjs
+// node_modules/jira.js/dist/esm/version3/issueWorklogs.mjs
 var IssueWorklogs = class {
   client;
   constructor(client) {
     this.client = client;
   }
   async getIssueWorklog(parameters, callback) {
-    const issueIdOrKey = typeof parameters === "string" ? parameters : parameters.issueIdOrKey;
     const config3 = {
-      url: `/rest/api/2/issue/${issueIdOrKey}/worklog`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog`,
       method: "GET",
       params: {
-        startAt: typeof parameters !== "string" ? parameters.startAt : void 0,
-        maxResults: typeof parameters !== "string" ? parameters.maxResults : void 0,
-        startedAfter: typeof parameters !== "string" ? parameters.startedAfter : void 0,
-        startedBefore: typeof parameters !== "string" ? parameters.startedBefore : void 0,
-        expand: typeof parameters !== "string" ? parameters.expand : void 0
+        startAt: parameters.startAt,
+        maxResults: parameters.maxResults,
+        startedAfter: parameters.startedAfter,
+        startedBefore: parameters.startedBefore,
+        expand: parameters.expand
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async addWorklog(parameters, callback) {
+    let comment;
+    if (typeof parameters.comment === "string") {
+      comment = {
+        type: "doc",
+        version: 1,
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: parameters.comment
+              }
+            ]
+          }
+        ]
+      };
+    } else {
+      comment = parameters.comment;
+    }
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog`,
       method: "POST",
       params: {
         notifyUsers: parameters.notifyUsers,
@@ -76242,7 +75703,7 @@ var IssueWorklogs = class {
       },
       data: {
         author: parameters.author,
-        comment: parameters.comment,
+        comment,
         created: parameters.created,
         id: parameters.id,
         issueId: parameters.issueId,
@@ -76260,7 +75721,7 @@ var IssueWorklogs = class {
   }
   async bulkDeleteWorklogs(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog`,
       method: "DELETE",
       params: {
         adjustEstimate: parameters.adjustEstimate,
@@ -76274,7 +75735,7 @@ var IssueWorklogs = class {
   }
   async bulkMoveWorklogs(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog/move`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog/move`,
       method: "POST",
       params: {
         adjustEstimate: parameters.adjustEstimate,
@@ -76286,7 +75747,7 @@ var IssueWorklogs = class {
   }
   async getWorklog(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog/${parameters.id}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog/${parameters.id}`,
       method: "GET",
       params: {
         expand: parameters.expand
@@ -76295,8 +75756,28 @@ var IssueWorklogs = class {
     return this.client.sendRequest(config3, callback);
   }
   async updateWorklog(parameters, callback) {
+    let comment;
+    if (typeof parameters.comment === "string") {
+      comment = {
+        type: "doc",
+        version: 1,
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: parameters.comment
+              }
+            ]
+          }
+        ]
+      };
+    } else {
+      comment = parameters.comment;
+    }
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog/${parameters.id}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog/${parameters.id}`,
       method: "PUT",
       params: {
         notifyUsers: parameters.notifyUsers,
@@ -76306,7 +75787,7 @@ var IssueWorklogs = class {
         overrideEditableFlag: parameters.overrideEditableFlag
       },
       data: {
-        comment: parameters.comment,
+        comment,
         visibility: parameters.visibility,
         started: parameters.started,
         timeSpent: parameters.timeSpent,
@@ -76318,7 +75799,7 @@ var IssueWorklogs = class {
   }
   async deleteWorklog(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/issue/${parameters.issueIdOrKey}/worklog/${parameters.id}`,
+      url: `/rest/api/3/issue/${parameters.issueIdOrKey}/worklog/${parameters.id}`,
       method: "DELETE",
       params: {
         notifyUsers: parameters.notifyUsers,
@@ -76332,7 +75813,7 @@ var IssueWorklogs = class {
   }
   async getIdsOfWorklogsDeletedSince(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/worklog/deleted",
+      url: "/rest/api/3/worklog/deleted",
       method: "GET",
       params: {
         since: parameters?.since
@@ -76342,7 +75823,7 @@ var IssueWorklogs = class {
   }
   async getWorklogsForIds(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/worklog/list",
+      url: "/rest/api/3/worklog/list",
       method: "POST",
       params: {
         expand: parameters?.expand
@@ -76355,7 +75836,7 @@ var IssueWorklogs = class {
   }
   async getIdsOfWorklogsModifiedSince(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/worklog/updated",
+      url: "/rest/api/3/worklog/updated",
       method: "GET",
       params: {
         since: parameters?.since,
@@ -76366,7 +75847,7 @@ var IssueWorklogs = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/jiraExpressions.mjs
+// node_modules/jira.js/dist/esm/version3/jiraExpressions.mjs
 var JiraExpressions = class {
   client;
   constructor(client) {
@@ -76374,7 +75855,7 @@ var JiraExpressions = class {
   }
   async analyseExpression(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/expression/analyse",
+      url: "/rest/api/3/expression/analyse",
       method: "POST",
       params: {
         check: parameters?.check
@@ -76388,7 +75869,7 @@ var JiraExpressions = class {
   }
   async evaluateJiraExpression(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/expression/eval",
+      url: "/rest/api/3/expression/eval",
       method: "POST",
       params: {
         expand: parameters.expand
@@ -76402,21 +75883,21 @@ var JiraExpressions = class {
   }
   async evaluateJiraExpressionUsingEnhancedSearch(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/expression/evaluate",
+      url: "/rest/api/3/expression/evaluate",
       method: "POST",
       params: {
         expand: parameters.expand
       },
       data: {
-        expression: parameters.expression,
-        context: parameters.context
+        context: parameters.context,
+        expression: parameters.expression
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/jiraSettings.mjs
+// node_modules/jira.js/dist/esm/version3/jiraSettings.mjs
 var JiraSettings = class {
   client;
   constructor(client) {
@@ -76424,7 +75905,7 @@ var JiraSettings = class {
   }
   async getApplicationProperty(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/application-properties",
+      url: "/rest/api/3/application-properties",
       method: "GET",
       params: {
         key: parameters?.key,
@@ -76436,14 +75917,14 @@ var JiraSettings = class {
   }
   async getAdvancedSettings(callback) {
     const config3 = {
-      url: "/rest/api/2/application-properties/advanced-settings",
+      url: "/rest/api/3/application-properties/advanced-settings",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setApplicationProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/application-properties/${parameters.id}`,
+      url: `/rest/api/3/application-properties/${parameters.id}`,
       method: "PUT",
       data: parameters.body
     };
@@ -76451,14 +75932,14 @@ var JiraSettings = class {
   }
   async getConfiguration(callback) {
     const config3 = {
-      url: "/rest/api/2/configuration",
+      url: "/rest/api/3/configuration",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/jQL.mjs
+// node_modules/jira.js/dist/esm/version3/jQL.mjs
 var JQL = class {
   client;
   constructor(client) {
@@ -76466,14 +75947,14 @@ var JQL = class {
   }
   async getAutoComplete(callback) {
     const config3 = {
-      url: "/rest/api/2/jql/autocompletedata",
+      url: "/rest/api/3/jql/autocompletedata",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getAutoCompletePost(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/autocompletedata",
+      url: "/rest/api/3/jql/autocompletedata",
       method: "POST",
       data: {
         includeCollapsedFields: parameters?.includeCollapsedFields,
@@ -76484,7 +75965,7 @@ var JQL = class {
   }
   async getFieldAutoCompleteForQueryString(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/autocompletedata/suggestions",
+      url: "/rest/api/3/jql/autocompletedata/suggestions",
       method: "GET",
       params: {
         fieldName: parameters?.fieldName,
@@ -76497,7 +75978,7 @@ var JQL = class {
   }
   async parseJqlQueries(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/parse",
+      url: "/rest/api/3/jql/parse",
       method: "POST",
       params: {
         validation: parameters.validation
@@ -76510,7 +75991,7 @@ var JQL = class {
   }
   async migrateQueries(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/pdcleaner",
+      url: "/rest/api/3/jql/pdcleaner",
       method: "POST",
       data: {
         queryStrings: parameters?.queryStrings
@@ -76520,7 +76001,7 @@ var JQL = class {
   }
   async sanitiseJqlQueries(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/sanitize",
+      url: "/rest/api/3/jql/sanitize",
       method: "POST",
       data: {
         queries: parameters?.queries
@@ -76530,7 +76011,7 @@ var JQL = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/jqlFunctionsApps.mjs
+// node_modules/jira.js/dist/esm/version3/jqlFunctionsApps.mjs
 var JqlFunctionsApps = class {
   client;
   constructor(client) {
@@ -76538,7 +76019,7 @@ var JqlFunctionsApps = class {
   }
   async getPrecomputations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/function/computation",
+      url: "/rest/api/3/jql/function/computation",
       method: "GET",
       params: {
         functionKey: parameters?.functionKey,
@@ -76552,7 +76033,7 @@ var JqlFunctionsApps = class {
   }
   async updatePrecomputations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/function/computation",
+      url: "/rest/api/3/jql/function/computation",
       method: "POST",
       params: {
         skipNotFoundPrecomputations: parameters.skipNotFoundPrecomputations
@@ -76565,7 +76046,7 @@ var JqlFunctionsApps = class {
   }
   async getPrecomputationsByID(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/jql/function/computation/search",
+      url: "/rest/api/3/jql/function/computation/search",
       method: "POST",
       params: {
         orderBy: parameters.orderBy
@@ -76578,7 +76059,7 @@ var JqlFunctionsApps = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/labels.mjs
+// node_modules/jira.js/dist/esm/version3/labels.mjs
 var Labels = class {
   client;
   constructor(client) {
@@ -76586,7 +76067,7 @@ var Labels = class {
   }
   async getAllLabels(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/label",
+      url: "/rest/api/3/label",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -76597,7 +76078,7 @@ var Labels = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/licenseMetrics.mjs
+// node_modules/jira.js/dist/esm/version3/licenseMetrics.mjs
 var LicenseMetrics = class {
   client;
   constructor(client) {
@@ -76605,28 +76086,28 @@ var LicenseMetrics = class {
   }
   async getLicense(callback) {
     const config3 = {
-      url: "/rest/api/2/instance/license",
+      url: "/rest/api/3/instance/license",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getApproximateLicenseCount(callback) {
     const config3 = {
-      url: "/rest/api/2/license/approximateLicenseCount",
+      url: "/rest/api/3/license/approximateLicenseCount",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getApproximateApplicationLicenseCount(applicationKey, callback) {
     const config3 = {
-      url: `/rest/api/2/license/approximateLicenseCount/product/${applicationKey}`,
+      url: `/rest/api/3/license/approximateLicenseCount/product/${applicationKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/migrationOfConnectModulesToForge.mjs
+// node_modules/jira.js/dist/esm/version3/migrationOfConnectModulesToForge.mjs
 var MigrationOfConnectModulesToForge = class {
   client;
   constructor(client) {
@@ -76641,7 +76122,7 @@ var MigrationOfConnectModulesToForge = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/myself.mjs
+// node_modules/jira.js/dist/esm/version3/myself.mjs
 var Myself = class {
   client;
   constructor(client) {
@@ -76649,7 +76130,7 @@ var Myself = class {
   }
   async getPreference(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/mypreferences",
+      url: "/rest/api/3/mypreferences",
       method: "GET",
       params: {
         key: parameters.key
@@ -76659,21 +76140,17 @@ var Myself = class {
   }
   async setPreference(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/mypreferences",
+      url: "/rest/api/3/mypreferences",
       method: "PUT",
-      headers: {
-        "Content-Type": typeof parameters.value === "string" ? "text/plain" : "application/json"
-      },
       params: {
         key: parameters.key
-      },
-      data: parameters.value
+      }
     };
     return this.client.sendRequest(config3, callback);
   }
   async removePreference(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/mypreferences",
+      url: "/rest/api/3/mypreferences",
       method: "DELETE",
       params: {
         key: parameters.key
@@ -76683,14 +76160,14 @@ var Myself = class {
   }
   async getLocale(callback) {
     const config3 = {
-      url: "/rest/api/2/mypreferences/locale",
+      url: "/rest/api/3/mypreferences/locale",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getCurrentUser(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/myself",
+      url: "/rest/api/3/myself",
       method: "GET",
       params: {
         expand: parameters?.expand
@@ -76700,7 +76177,7 @@ var Myself = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/permissions.mjs
+// node_modules/jira.js/dist/esm/version3/permissions.mjs
 var Permissions = class {
   client;
   constructor(client) {
@@ -76708,7 +76185,7 @@ var Permissions = class {
   }
   async getMyPermissions(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/mypermissions",
+      url: "/rest/api/3/mypermissions",
       method: "GET",
       params: {
         projectKey: parameters?.projectKey,
@@ -76725,14 +76202,14 @@ var Permissions = class {
   }
   async getAllPermissions(callback) {
     const config3 = {
-      url: "/rest/api/2/permissions",
+      url: "/rest/api/3/permissions",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getBulkPermissions(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/permissions/check",
+      url: "/rest/api/3/permissions/check",
       method: "POST",
       data: {
         accountId: parameters?.accountId,
@@ -76744,7 +76221,7 @@ var Permissions = class {
   }
   async getPermittedProjects(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/permissions/project",
+      url: "/rest/api/3/permissions/project",
       method: "POST",
       data: {
         permissions: parameters?.permissions
@@ -76754,7 +76231,7 @@ var Permissions = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/permissionSchemes.mjs
+// node_modules/jira.js/dist/esm/version3/permissionSchemes.mjs
 var PermissionSchemes = class {
   client;
   constructor(client) {
@@ -76762,7 +76239,7 @@ var PermissionSchemes = class {
   }
   async getAllPermissionSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/permissionscheme",
+      url: "/rest/api/3/permissionscheme",
       method: "GET",
       params: {
         expand: parameters?.expand
@@ -76772,7 +76249,7 @@ var PermissionSchemes = class {
   }
   async createPermissionScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/permissionscheme",
+      url: "/rest/api/3/permissionscheme",
       method: "POST",
       params: {
         expand: parameters?.expand
@@ -76785,19 +76262,18 @@ var PermissionSchemes = class {
     return this.client.sendRequest(config3, callback);
   }
   async getPermissionScheme(parameters, callback) {
-    const schemeId = typeof parameters === "string" ? parameters : parameters.schemeId;
     const config3 = {
-      url: `/rest/api/2/permissionscheme/${schemeId}`,
+      url: `/rest/api/3/permissionscheme/${parameters.schemeId}`,
       method: "GET",
       params: {
-        expand: typeof parameters !== "string" ? parameters.expand : void 0
+        expand: parameters.expand
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async updatePermissionScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/permissionscheme/${parameters.schemeId}`,
+      url: `/rest/api/3/permissionscheme/${parameters.schemeId}`,
       method: "PUT",
       params: {
         expand: parameters.expand
@@ -76812,14 +76288,14 @@ var PermissionSchemes = class {
   }
   async deletePermissionScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/permissionscheme/${parameters.schemeId}`,
+      url: `/rest/api/3/permissionscheme/${parameters.schemeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getPermissionSchemeGrants(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/permissionscheme/${parameters.schemeId}/permission`,
+      url: `/rest/api/3/permissionscheme/${parameters.schemeId}/permission`,
       method: "GET",
       params: {
         expand: parameters.expand
@@ -76829,7 +76305,7 @@ var PermissionSchemes = class {
   }
   async createPermissionGrant(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/permissionscheme/${parameters.schemeId}/permission`,
+      url: `/rest/api/3/permissionscheme/${parameters.schemeId}/permission`,
       method: "POST",
       params: {
         expand: parameters.expand
@@ -76845,7 +76321,7 @@ var PermissionSchemes = class {
   }
   async getPermissionSchemeGrant(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/permissionscheme/${parameters.schemeId}/permission/${parameters.permissionId}`,
+      url: `/rest/api/3/permissionscheme/${parameters.schemeId}/permission/${parameters.permissionId}`,
       method: "GET",
       params: {
         expand: parameters.expand
@@ -76855,14 +76331,14 @@ var PermissionSchemes = class {
   }
   async deletePermissionSchemeEntity(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/permissionscheme/${parameters.schemeId}/permission/${parameters.permissionId}`,
+      url: `/rest/api/3/permissionscheme/${parameters.schemeId}/permission/${parameters.permissionId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/plans.mjs
+// node_modules/jira.js/dist/esm/version3/plans.mjs
 var Plans = class {
   client;
   constructor(client) {
@@ -76870,7 +76346,7 @@ var Plans = class {
   }
   async getPlans(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/plans/plan",
+      url: "/rest/api/3/plans/plan",
       method: "GET",
       params: {
         includeTrashed: parameters?.includeTrashed,
@@ -76883,7 +76359,7 @@ var Plans = class {
   }
   async createPlan(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/plans/plan",
+      url: "/rest/api/3/plans/plan",
       method: "POST",
       params: {
         useGroupId: parameters.useGroupId
@@ -76903,7 +76379,7 @@ var Plans = class {
   }
   async getPlan(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}`,
       method: "GET",
       params: {
         useGroupId: parameters.useGroupId
@@ -76913,24 +76389,34 @@ var Plans = class {
   }
   async updatePlan(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}`,
       method: "PUT",
       params: {
         useGroupId: parameters.useGroupId
+      },
+      data: {
+        crossProjectReleases: parameters.crossProjectReleases,
+        customFields: parameters.customFields,
+        exclusionRules: parameters.exclusionRules,
+        issueSources: parameters.issueSources,
+        leadAccountId: parameters.leadAccountId,
+        name: parameters.name,
+        permissions: parameters.permissions,
+        scheduling: parameters.scheduling
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async archivePlan(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/archive`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/archive`,
       method: "PUT"
     };
     return this.client.sendRequest(config3, callback);
   }
   async duplicatePlan(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/duplicate`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/duplicate`,
       method: "POST",
       data: {
         name: parameters.name
@@ -76940,14 +76426,14 @@ var Plans = class {
   }
   async trashPlan(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/trash`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/trash`,
       method: "PUT"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/prioritySchemes.mjs
+// node_modules/jira.js/dist/esm/version3/prioritySchemes.mjs
 var PrioritySchemes = class {
   client;
   constructor(client) {
@@ -76955,7 +76441,7 @@ var PrioritySchemes = class {
   }
   async getPrioritySchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/priorityscheme",
+      url: "/rest/api/3/priorityscheme",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -76972,7 +76458,7 @@ var PrioritySchemes = class {
   }
   async createPriorityScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/priorityscheme",
+      url: "/rest/api/3/priorityscheme",
       method: "POST",
       data: {
         defaultPriorityId: parameters.defaultPriorityId,
@@ -76987,7 +76473,7 @@ var PrioritySchemes = class {
   }
   async suggestedPrioritiesForMappings(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/priorityscheme/mappings",
+      url: "/rest/api/3/priorityscheme/mappings",
       method: "POST",
       data: {
         maxResults: parameters?.maxResults,
@@ -77001,7 +76487,7 @@ var PrioritySchemes = class {
   }
   async getAvailablePrioritiesByPriorityScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/priorityscheme/priorities/available",
+      url: "/rest/api/3/priorityscheme/priorities/available",
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -77015,7 +76501,7 @@ var PrioritySchemes = class {
   }
   async updatePriorityScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/priorityscheme/${parameters.schemeId}`,
+      url: `/rest/api/3/priorityscheme/${parameters.schemeId}`,
       method: "PUT",
       data: {
         defaultPriorityId: parameters.defaultPriorityId,
@@ -77030,14 +76516,14 @@ var PrioritySchemes = class {
   }
   async deletePriorityScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/priorityscheme/${parameters.schemeId}`,
+      url: `/rest/api/3/priorityscheme/${parameters.schemeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getPrioritiesByPriorityScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/priorityscheme/${parameters.schemeId}/priorities`,
+      url: `/rest/api/3/priorityscheme/${parameters.schemeId}/priorities`,
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -77048,7 +76534,7 @@ var PrioritySchemes = class {
   }
   async getProjectsByPriorityScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/priorityscheme/${parameters.schemeId}/projects`,
+      url: `/rest/api/3/priorityscheme/${parameters.schemeId}/projects`,
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -77061,7 +76547,7 @@ var PrioritySchemes = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectAvatars.mjs
+// node_modules/jira.js/dist/esm/version3/projectAvatars.mjs
 var ProjectAvatars = class {
   client;
   constructor(client) {
@@ -77069,7 +76555,7 @@ var ProjectAvatars = class {
   }
   async updateProjectAvatar(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/avatar`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/avatar`,
       method: "PUT",
       data: {
         fileName: parameters.fileName,
@@ -77085,14 +76571,14 @@ var ProjectAvatars = class {
   }
   async deleteProjectAvatar(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/avatar/${parameters.id}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/avatar/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createProjectAvatar(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/avatar2`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/avatar2`,
       method: "POST",
       headers: {
         "X-Atlassian-Token": "no-check",
@@ -77108,16 +76594,15 @@ var ProjectAvatars = class {
     return this.client.sendRequest(config3, callback);
   }
   async getAllProjectAvatars(parameters, callback) {
-    const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/avatars`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/avatars`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectCategories.mjs
+// node_modules/jira.js/dist/esm/version3/projectCategories.mjs
 var ProjectCategories = class {
   client;
   constructor(client) {
@@ -77125,14 +76610,14 @@ var ProjectCategories = class {
   }
   async getAllProjectCategories(callback) {
     const config3 = {
-      url: "/rest/api/2/projectCategory",
+      url: "/rest/api/3/projectCategory",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createProjectCategory(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/projectCategory",
+      url: "/rest/api/3/projectCategory",
       method: "POST",
       data: {
         description: parameters.description,
@@ -77144,16 +76629,15 @@ var ProjectCategories = class {
     return this.client.sendRequest(config3, callback);
   }
   async getProjectCategoryById(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/projectCategory/${id}`,
+      url: `/rest/api/3/projectCategory/${parameters.id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateProjectCategory(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/projectCategory/${parameters.id}`,
+      url: `/rest/api/3/projectCategory/${parameters.id}`,
       method: "PUT",
       data: {
         name: parameters.name,
@@ -77163,16 +76647,15 @@ var ProjectCategories = class {
     return this.client.sendRequest(config3, callback);
   }
   async removeProjectCategory(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/projectCategory/${id}`,
+      url: `/rest/api/3/projectCategory/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectClassificationLevels.mjs
+// node_modules/jira.js/dist/esm/version3/projectClassificationLevels.mjs
 var ProjectClassificationLevels = class {
   client;
   constructor(client) {
@@ -77180,14 +76663,14 @@ var ProjectClassificationLevels = class {
   }
   async getDefaultProjectClassification(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/classification-level/default`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/classification-level/default`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateDefaultProjectClassification(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/classification-level/default`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/classification-level/default`,
       method: "PUT",
       data: {
         id: parameters.id
@@ -77197,14 +76680,14 @@ var ProjectClassificationLevels = class {
   }
   async removeDefaultProjectClassification(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/classification-level/default`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/classification-level/default`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectComponents.mjs
+// node_modules/jira.js/dist/esm/version3/projectComponents.mjs
 var ProjectComponents = class {
   client;
   constructor(client) {
@@ -77212,21 +76695,21 @@ var ProjectComponents = class {
   }
   async findComponentsForProjects(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/component",
+      url: "/rest/api/3/component",
       method: "GET",
       params: {
-        projectIdsOrKeys: parameters?.projectIdsOrKeys,
-        startAt: parameters?.startAt,
-        maxResults: parameters?.maxResults,
-        orderBy: parameters?.orderBy,
-        query: parameters?.query
+        projectIdsOrKeys: parameters.projectIdsOrKeys,
+        startAt: parameters.startAt,
+        maxResults: parameters.maxResults,
+        orderBy: parameters.orderBy,
+        query: parameters.query
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async createComponent(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/component",
+      url: "/rest/api/3/component",
       method: "POST",
       data: {
         ari: parameters.ari,
@@ -77250,16 +76733,15 @@ var ProjectComponents = class {
     return this.client.sendRequest(config3, callback);
   }
   async getComponent(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/component/${id}`,
+      url: `/rest/api/3/component/${parameters.id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateComponent(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/component/${parameters.id}`,
+      url: `/rest/api/3/component/${parameters.id}`,
       method: "PUT",
       data: {
         name: parameters.name,
@@ -77273,27 +76755,25 @@ var ProjectComponents = class {
     return this.client.sendRequest(config3, callback);
   }
   async deleteComponent(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/component/${id}`,
+      url: `/rest/api/3/component/${parameters.id}`,
       method: "DELETE",
       params: {
-        moveIssuesTo: typeof parameters !== "string" ? parameters.moveIssuesTo : void 0
+        moveIssuesTo: parameters.moveIssuesTo
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getComponentRelatedIssues(parameters, callback) {
-    const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/component/${id}/relatedIssueCounts`,
+      url: `/rest/api/3/component/${parameters.id}/relatedIssueCounts`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getProjectComponentsPaginated(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/component`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/component`,
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -77306,19 +76786,18 @@ var ProjectComponents = class {
     return this.client.sendRequest(config3, callback);
   }
   async getProjectComponents(parameters, callback) {
-    const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/components`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/components`,
       method: "GET",
       params: {
-        componentSource: typeof parameters !== "string" ? parameters.componentSource : void 0
+        componentSource: parameters.componentSource
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectEmail.mjs
+// node_modules/jira.js/dist/esm/version3/projectEmail.mjs
 var ProjectEmail = class {
   client;
   constructor(client) {
@@ -77327,14 +76806,14 @@ var ProjectEmail = class {
   async getProjectEmail(parameters, callback) {
     const projectId = typeof parameters === "string" ? parameters : parameters.projectId;
     const config3 = {
-      url: `/rest/api/2/project/${projectId}/email`,
+      url: `/rest/api/3/project/${projectId}/email`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateProjectEmail(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectId}/email`,
+      url: `/rest/api/3/project/${parameters.projectId}/email`,
       method: "PUT",
       data: {
         emailAddress: parameters.emailAddress,
@@ -77345,7 +76824,7 @@ var ProjectEmail = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectFeatures.mjs
+// node_modules/jira.js/dist/esm/version3/projectFeatures.mjs
 var ProjectFeatures = class {
   client;
   constructor(client) {
@@ -77354,14 +76833,14 @@ var ProjectFeatures = class {
   async getFeaturesForProject(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/features`,
+      url: `/rest/api/3/project/${projectIdOrKey}/features`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async toggleFeatureForProject(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/features/${parameters.featureKey}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/features/${parameters.featureKey}`,
       method: "PUT",
       data: {
         state: parameters.state
@@ -77371,7 +76850,7 @@ var ProjectFeatures = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectKeyAndNameValidation.mjs
+// node_modules/jira.js/dist/esm/version3/projectKeyAndNameValidation.mjs
 var ProjectKeyAndNameValidation = class {
   client;
   constructor(client) {
@@ -77380,7 +76859,7 @@ var ProjectKeyAndNameValidation = class {
   async validateProjectKey(parameters, callback) {
     const key = typeof parameters === "string" ? parameters : parameters?.key;
     const config3 = {
-      url: "/rest/api/2/projectvalidate/key",
+      url: "/rest/api/3/projectvalidate/key",
       method: "GET",
       params: {
         key
@@ -77391,7 +76870,7 @@ var ProjectKeyAndNameValidation = class {
   async getValidProjectKey(parameters, callback) {
     const key = typeof parameters === "string" ? parameters : parameters?.key;
     const config3 = {
-      url: "/rest/api/2/projectvalidate/validProjectKey",
+      url: "/rest/api/3/projectvalidate/validProjectKey",
       method: "GET",
       params: {
         key
@@ -77402,7 +76881,7 @@ var ProjectKeyAndNameValidation = class {
   async getValidProjectName(parameters, callback) {
     const name = typeof parameters === "string" ? parameters : parameters.name;
     const config3 = {
-      url: "/rest/api/2/projectvalidate/validProjectName",
+      url: "/rest/api/3/projectvalidate/validProjectName",
       method: "GET",
       params: {
         name
@@ -77412,7 +76891,7 @@ var ProjectKeyAndNameValidation = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectPermissionSchemes.mjs
+// node_modules/jira.js/dist/esm/version3/projectPermissionSchemes.mjs
 var ProjectPermissionSchemes = class {
   client;
   constructor(client) {
@@ -77421,7 +76900,7 @@ var ProjectPermissionSchemes = class {
   async getProjectIssueSecurityScheme(parameters, callback) {
     const projectKeyOrId = typeof parameters === "string" ? parameters : parameters.projectKeyOrId;
     const config3 = {
-      url: `/rest/api/2/project/${projectKeyOrId}/issuesecuritylevelscheme`,
+      url: `/rest/api/3/project/${projectKeyOrId}/issuesecuritylevelscheme`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -77429,7 +76908,7 @@ var ProjectPermissionSchemes = class {
   async getAssignedPermissionScheme(parameters, callback) {
     const projectKeyOrId = typeof parameters === "string" ? parameters : parameters.projectKeyOrId;
     const config3 = {
-      url: `/rest/api/2/project/${projectKeyOrId}/permissionscheme`,
+      url: `/rest/api/3/project/${projectKeyOrId}/permissionscheme`,
       method: "GET",
       params: {
         expand: typeof parameters !== "string" && parameters.expand
@@ -77439,7 +76918,7 @@ var ProjectPermissionSchemes = class {
   }
   async assignPermissionScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectKeyOrId}/permissionscheme`,
+      url: `/rest/api/3/project/${parameters.projectKeyOrId}/permissionscheme`,
       method: "PUT",
       params: {
         expand: parameters.expand
@@ -77453,14 +76932,14 @@ var ProjectPermissionSchemes = class {
   async getSecurityLevelsForProject(parameters, callback) {
     const projectKeyOrId = typeof parameters === "string" ? parameters : parameters.projectKeyOrId;
     const config3 = {
-      url: `/rest/api/2/project/${projectKeyOrId}/securitylevel`,
+      url: `/rest/api/3/project/${projectKeyOrId}/securitylevel`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectProperties.mjs
+// node_modules/jira.js/dist/esm/version3/projectProperties.mjs
 var ProjectProperties = class {
   client;
   constructor(client) {
@@ -77469,21 +76948,21 @@ var ProjectProperties = class {
   async getProjectPropertyKeys(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/properties`,
+      url: `/rest/api/3/project/${projectIdOrKey}/properties`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getProjectProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/properties/${parameters.propertyKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setProjectProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/properties/${parameters.propertyKey}`,
       method: "PUT",
       data: parameters.propertyValue
     };
@@ -77491,14 +76970,14 @@ var ProjectProperties = class {
   }
   async deleteProjectProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/properties/${parameters.propertyKey}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectRoleActors.mjs
+// node_modules/jira.js/dist/esm/version3/projectRoleActors.mjs
 var ProjectRoleActors = class {
   client;
   constructor(client) {
@@ -77506,19 +76985,19 @@ var ProjectRoleActors = class {
   }
   async addActorUsers(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/role/${parameters.id}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/role/${parameters.id}`,
       method: "POST",
       data: {
-        user: parameters.user,
         group: parameters.group,
-        groupId: parameters.groupId
+        groupId: parameters.groupId,
+        user: parameters.user
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async setActors(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/role/${parameters.id}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/role/${parameters.id}`,
       method: "PUT",
       data: {
         categorisedActors: parameters.categorisedActors
@@ -77528,7 +77007,7 @@ var ProjectRoleActors = class {
   }
   async deleteActor(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/role/${parameters.id}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/role/${parameters.id}`,
       method: "DELETE",
       params: {
         user: parameters.user,
@@ -77541,26 +77020,26 @@ var ProjectRoleActors = class {
   async getProjectRoleActorsForRole(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/role/${id}/actors`,
+      url: `/rest/api/3/role/${id}/actors`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async addProjectRoleActorsToRole(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/role/${parameters.id}/actors`,
+      url: `/rest/api/3/role/${parameters.id}/actors`,
       method: "POST",
       data: {
-        user: parameters.user,
+        group: parameters.group,
         groupId: parameters.groupId,
-        group: parameters.group
+        user: parameters.user
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteProjectRoleActorsFromRole(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/role/${parameters.id}/actors`,
+      url: `/rest/api/3/role/${parameters.id}/actors`,
       method: "DELETE",
       params: {
         user: parameters.user,
@@ -77572,7 +77051,7 @@ var ProjectRoleActors = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectRoles.mjs
+// node_modules/jira.js/dist/esm/version3/projectRoles.mjs
 var ProjectRoles = class {
   client;
   constructor(client) {
@@ -77581,14 +77060,14 @@ var ProjectRoles = class {
   async getProjectRoles(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/role`,
+      url: `/rest/api/3/project/${projectIdOrKey}/role`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getProjectRole(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}/role/${parameters.id}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}/role/${parameters.id}`,
       method: "GET",
       params: {
         excludeInactiveUsers: parameters.excludeInactiveUsers
@@ -77599,25 +77078,25 @@ var ProjectRoles = class {
   async getProjectRoleDetails(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/roledetails`,
+      url: `/rest/api/3/project/${projectIdOrKey}/roledetails`,
       method: "GET",
       params: {
-        currentMember: typeof parameters !== "string" ? parameters.currentMember : void 0,
-        excludeConnectAddons: typeof parameters !== "string" ? parameters.excludeConnectAddons : void 0
+        currentMember: typeof parameters !== "string" && parameters.currentMember,
+        excludeConnectAddons: typeof parameters !== "string" && parameters.excludeConnectAddons
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getAllProjectRoles(callback) {
     const config3 = {
-      url: "/rest/api/2/role",
+      url: "/rest/api/3/role",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createProjectRole(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/role",
+      url: "/rest/api/3/role",
       method: "POST",
       data: {
         description: parameters.description,
@@ -77629,14 +77108,14 @@ var ProjectRoles = class {
   async getProjectRoleById(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/role/${id}`,
+      url: `/rest/api/3/role/${id}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async partialUpdateProjectRole(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/role/${parameters.id}`,
+      url: `/rest/api/3/role/${parameters.id}`,
       method: "POST",
       data: {
         description: parameters.description,
@@ -77647,7 +77126,7 @@ var ProjectRoles = class {
   }
   async fullyUpdateProjectRole(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/role/${parameters.id}`,
+      url: `/rest/api/3/role/${parameters.id}`,
       method: "PUT",
       data: {
         description: parameters.description,
@@ -77659,17 +77138,17 @@ var ProjectRoles = class {
   async deleteProjectRole(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/role/${id}`,
+      url: `/rest/api/3/role/${id}`,
       method: "DELETE",
       params: {
-        swap: typeof parameters !== "string" ? parameters.swap : void 0
+        swap: typeof parameters !== "string" && parameters.swap
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projects.mjs
+// node_modules/jira.js/dist/esm/version3/projects.mjs
 var Projects = class {
   client;
   constructor(client) {
@@ -77677,7 +77156,7 @@ var Projects = class {
   }
   async createProject(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/project",
+      url: "/rest/api/3/project",
       method: "POST",
       data: {
         assigneeType: parameters.assigneeType,
@@ -77703,7 +77182,7 @@ var Projects = class {
   }
   async getRecent(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/project/recent",
+      url: "/rest/api/3/project/recent",
       method: "GET",
       params: {
         expand: parameters?.expand,
@@ -77714,7 +77193,7 @@ var Projects = class {
   }
   async searchProjects(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/project/search",
+      url: "/rest/api/3/project/search",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -77737,18 +77216,18 @@ var Projects = class {
   async getProject(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}`,
+      url: `/rest/api/3/project/${projectIdOrKey}`,
       method: "GET",
       params: {
-        expand: typeof parameters !== "string" ? parameters.expand : void 0,
-        properties: typeof parameters !== "string" ? parameters.properties : void 0
+        expand: typeof parameters !== "string" && parameters.expand,
+        properties: typeof parameters !== "string" && parameters.properties
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateProject(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/project/${parameters.projectIdOrKey}`,
+      url: `/rest/api/3/project/${parameters.projectIdOrKey}`,
       method: "PUT",
       params: {
         expand: parameters.expand
@@ -77775,10 +77254,10 @@ var Projects = class {
   async deleteProject(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}`,
+      url: `/rest/api/3/project/${projectIdOrKey}`,
       method: "DELETE",
       params: {
-        enableUndo: typeof parameters !== "string" ? parameters.enableUndo : void 0
+        enableUndo: typeof parameters !== "string" && parameters.enableUndo
       }
     };
     return this.client.sendRequest(config3, callback);
@@ -77786,7 +77265,7 @@ var Projects = class {
   async archiveProject(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/archive`,
+      url: `/rest/api/3/project/${projectIdOrKey}/archive`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
@@ -77794,7 +77273,7 @@ var Projects = class {
   async deleteProjectAsynchronously(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/delete`,
+      url: `/rest/api/3/project/${projectIdOrKey}/delete`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
@@ -77802,7 +77281,7 @@ var Projects = class {
   async restore(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/restore`,
+      url: `/rest/api/3/project/${projectIdOrKey}/restore`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
@@ -77810,7 +77289,7 @@ var Projects = class {
   async getAllStatuses(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/statuses`,
+      url: `/rest/api/3/project/${projectIdOrKey}/statuses`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -77818,25 +77297,24 @@ var Projects = class {
   async getHierarchy(parameters, callback) {
     const projectId = typeof parameters === "string" ? parameters : parameters.projectId;
     const config3 = {
-      url: `/rest/api/2/project/${projectId}/hierarchy`,
+      url: `/rest/api/3/project/${projectId}/hierarchy`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getNotificationSchemeForProject(parameters, callback) {
-    const projectKeyOrId = typeof parameters === "string" ? parameters : parameters.projectKeyOrId;
     const config3 = {
-      url: `/rest/api/2/project/${projectKeyOrId}/notificationscheme`,
+      url: `/rest/api/3/project/${parameters.projectKeyOrId}/notificationscheme`,
       method: "GET",
       params: {
-        expand: typeof parameters !== "string" ? parameters.expand : void 0
+        expand: parameters.expand
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectTemplates.mjs
+// node_modules/jira.js/dist/esm/version3/projectTemplates.mjs
 var ProjectTemplates = class {
   client;
   constructor(client) {
@@ -77844,18 +77322,18 @@ var ProjectTemplates = class {
   }
   async createProjectWithCustomTemplate(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/project-template",
+      url: "/rest/api/3/project-template",
       method: "POST",
       data: {
-        details: parameters?.details,
-        template: parameters?.template
+        details: parameters.details,
+        template: parameters.template
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async editTemplate(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/project-template/edit-template",
+      url: "/rest/api/3/project-template/edit-template",
       method: "PUT",
       data: {
         templateDescription: parameters.templateDescription,
@@ -77868,7 +77346,7 @@ var ProjectTemplates = class {
   }
   async liveTemplate(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/project-template/live-template",
+      url: "/rest/api/3/project-template/live-template",
       method: "GET",
       params: {
         projectId: parameters.projectId,
@@ -77879,7 +77357,7 @@ var ProjectTemplates = class {
   }
   async removeTemplate(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/project-template/remove-template",
+      url: "/rest/api/3/project-template/remove-template",
       method: "DELETE",
       params: {
         templateKey: parameters.templateKey
@@ -77889,7 +77367,7 @@ var ProjectTemplates = class {
   }
   async saveTemplate(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/project-template/save-template",
+      url: "/rest/api/3/project-template/save-template",
       method: "POST",
       data: {
         templateDescription: parameters.templateDescription,
@@ -77901,7 +77379,7 @@ var ProjectTemplates = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectTypes.mjs
+// node_modules/jira.js/dist/esm/version3/projectTypes.mjs
 var ProjectTypes = class {
   client;
   constructor(client) {
@@ -77909,14 +77387,14 @@ var ProjectTypes = class {
   }
   async getAllProjectTypes(callback) {
     const config3 = {
-      url: "/rest/api/2/project/type",
+      url: "/rest/api/3/project/type",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getAllAccessibleProjectTypes(callback) {
     const config3 = {
-      url: "/rest/api/2/project/type/accessible",
+      url: "/rest/api/3/project/type/accessible",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -77924,7 +77402,7 @@ var ProjectTypes = class {
   async getProjectTypeByKey(parameters, callback) {
     const projectTypeKey = typeof parameters === "string" ? parameters : parameters.projectTypeKey;
     const config3 = {
-      url: `/rest/api/2/project/type/${projectTypeKey}`,
+      url: `/rest/api/3/project/type/${projectTypeKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -77932,14 +77410,14 @@ var ProjectTypes = class {
   async getAccessibleProjectTypeByKey(parameters, callback) {
     const projectTypeKey = typeof parameters === "string" ? parameters : parameters.projectTypeKey;
     const config3 = {
-      url: `/rest/api/2/project/type/${projectTypeKey}/accessible`,
+      url: `/rest/api/3/project/type/${projectTypeKey}/accessible`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/projectVersions.mjs
+// node_modules/jira.js/dist/esm/version3/projectVersions.mjs
 var ProjectVersions = class {
   client;
   constructor(client) {
@@ -77948,15 +77426,15 @@ var ProjectVersions = class {
   async getProjectVersionsPaginated(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/version`,
+      url: `/rest/api/3/project/${projectIdOrKey}/version`,
       method: "GET",
       params: {
-        startAt: typeof parameters !== "string" ? parameters.startAt : void 0,
-        maxResults: typeof parameters !== "string" ? parameters.maxResults : void 0,
-        orderBy: typeof parameters !== "string" ? parameters.orderBy : void 0,
-        query: typeof parameters !== "string" ? parameters.query : void 0,
-        status: typeof parameters !== "string" ? parameters.status : void 0,
-        expand: typeof parameters !== "string" ? parameters.expand : void 0
+        startAt: typeof parameters !== "string" && parameters.startAt,
+        maxResults: typeof parameters !== "string" && parameters.maxResults,
+        orderBy: typeof parameters !== "string" && parameters.orderBy,
+        query: typeof parameters !== "string" && parameters.query,
+        status: typeof parameters !== "string" && parameters.status,
+        expand: typeof parameters !== "string" && parameters.expand
       }
     };
     return this.client.sendRequest(config3, callback);
@@ -77964,17 +77442,17 @@ var ProjectVersions = class {
   async getProjectVersions(parameters, callback) {
     const projectIdOrKey = typeof parameters === "string" ? parameters : parameters.projectIdOrKey;
     const config3 = {
-      url: `/rest/api/2/project/${projectIdOrKey}/versions`,
+      url: `/rest/api/3/project/${projectIdOrKey}/versions`,
       method: "GET",
       params: {
-        expand: typeof parameters !== "string" ? parameters.expand : void 0
+        expand: typeof parameters !== "string" && parameters.expand
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async createVersion(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/version",
+      url: "/rest/api/3/version",
       method: "POST",
       data: {
         approvers: parameters.approvers,
@@ -78002,17 +77480,17 @@ var ProjectVersions = class {
   async getVersion(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/version/${id}`,
+      url: `/rest/api/3/version/${id}`,
       method: "GET",
       params: {
-        expand: typeof parameters !== "string" ? parameters.expand : void 0
+        expand: typeof parameters !== "string" && parameters.expand
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateVersion(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/version/${parameters.id}`,
+      url: `/rest/api/3/version/${parameters.id}`,
       method: "PUT",
       data: {
         approvers: parameters.approvers,
@@ -78032,14 +77510,14 @@ var ProjectVersions = class {
   }
   async mergeVersions(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/version/${parameters.id}/mergeto/${parameters.moveIssuesTo}`,
+      url: `/rest/api/3/version/${parameters.id}/mergeto/${parameters.moveIssuesTo}`,
       method: "PUT"
     };
     return this.client.sendRequest(config3, callback);
   }
   async moveVersion(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/version/${parameters.id}/move`,
+      url: `/rest/api/3/version/${parameters.id}/move`,
       method: "POST",
       data: {
         after: parameters.after,
@@ -78051,21 +77529,21 @@ var ProjectVersions = class {
   async getVersionRelatedIssues(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/version/${id}/relatedIssueCounts`,
+      url: `/rest/api/3/version/${id}/relatedIssueCounts`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getRelatedWork(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/version/${parameters.id}/relatedwork`,
+      url: `/rest/api/3/version/${parameters.id}/relatedwork`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createRelatedWork(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/version/${parameters.id}/relatedwork`,
+      url: `/rest/api/3/version/${parameters.id}/relatedwork`,
       method: "POST",
       data: {
         category: parameters.category,
@@ -78079,7 +77557,7 @@ var ProjectVersions = class {
   }
   async updateRelatedWork(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/version/${parameters.id}/relatedwork`,
+      url: `/rest/api/3/version/${parameters.id}/relatedwork`,
       method: "PUT",
       data: {
         category: parameters.category,
@@ -78093,7 +77571,7 @@ var ProjectVersions = class {
   }
   async deleteAndReplaceVersion(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/version/${parameters.id}/removeAndSwap`,
+      url: `/rest/api/3/version/${parameters.id}/removeAndSwap`,
       method: "POST",
       data: {
         customFieldReplacementList: parameters.customFieldReplacementList,
@@ -78106,21 +77584,21 @@ var ProjectVersions = class {
   async getVersionUnresolvedIssues(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/version/${id}/unresolvedIssueCount`,
+      url: `/rest/api/3/version/${id}/unresolvedIssueCount`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteRelatedWork(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/version/${parameters.versionId}/relatedwork/${parameters.relatedWorkId}`,
+      url: `/rest/api/3/version/${parameters.versionId}/relatedwork/${parameters.relatedWorkId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/screens.mjs
+// node_modules/jira.js/dist/esm/version3/screens.mjs
 var Screens = class {
   client;
   constructor(client) {
@@ -78129,7 +77607,7 @@ var Screens = class {
   async getScreensForField(parameters, callback) {
     const fieldId = typeof parameters === "string" ? parameters : parameters.fieldId;
     const config3 = {
-      url: `/rest/api/2/field/${fieldId}/screens`,
+      url: `/rest/api/3/field/${fieldId}/screens`,
       method: "GET",
       params: {
         startAt: typeof parameters !== "string" && parameters.startAt,
@@ -78141,7 +77619,7 @@ var Screens = class {
   }
   async getScreens(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/screens",
+      url: "/rest/api/3/screens",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -78156,11 +77634,11 @@ var Screens = class {
   }
   async createScreen(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/screens",
+      url: "/rest/api/3/screens",
       method: "POST",
       data: {
-        name: parameters.name,
-        description: parameters.description
+        description: parameters.description,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
@@ -78168,18 +77646,18 @@ var Screens = class {
   async addFieldToDefaultScreen(parameters, callback) {
     const fieldId = typeof parameters === "string" ? parameters : parameters.fieldId;
     const config3 = {
-      url: `/rest/api/2/screens/addToDefault/${fieldId}`,
+      url: `/rest/api/3/screens/addToDefault/${fieldId}`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateScreen(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}`,
+      url: `/rest/api/3/screens/${parameters.screenId}`,
       method: "PUT",
       data: {
-        name: parameters.name,
-        description: parameters.description
+        description: parameters.description,
+        name: parameters.name
       }
     };
     return this.client.sendRequest(config3, callback);
@@ -78187,7 +77665,7 @@ var Screens = class {
   async deleteScreen(parameters, callback) {
     const screenId = typeof parameters === "string" ? parameters : parameters.screenId;
     const config3 = {
-      url: `/rest/api/2/screens/${screenId}`,
+      url: `/rest/api/3/screens/${screenId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -78195,14 +77673,14 @@ var Screens = class {
   async getAvailableScreenFields(parameters, callback) {
     const screenId = typeof parameters === "string" ? parameters : parameters.screenId;
     const config3 = {
-      url: `/rest/api/2/screens/${screenId}/availableFields`,
+      url: `/rest/api/3/screens/${screenId}/availableFields`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/screenSchemes.mjs
+// node_modules/jira.js/dist/esm/version3/screenSchemes.mjs
 var ScreenSchemes = class {
   client;
   constructor(client) {
@@ -78210,7 +77688,7 @@ var ScreenSchemes = class {
   }
   async getScreenSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/screenscheme",
+      url: "/rest/api/3/screenscheme",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -78226,7 +77704,7 @@ var ScreenSchemes = class {
   async createScreenScheme(parameters, callback) {
     const name = typeof parameters === "string" ? parameters : parameters.name;
     const config3 = {
-      url: "/rest/api/2/screenscheme",
+      url: "/rest/api/3/screenscheme",
       method: "POST",
       data: {
         name,
@@ -78238,11 +77716,11 @@ var ScreenSchemes = class {
   }
   async updateScreenScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screenscheme/${parameters.screenSchemeId}`,
+      url: `/rest/api/3/screenscheme/${parameters.screenSchemeId}`,
       method: "PUT",
       data: {
-        name: parameters.name,
         description: parameters.description,
+        name: parameters.name,
         screens: parameters.screens
       }
     };
@@ -78251,14 +77729,14 @@ var ScreenSchemes = class {
   async deleteScreenScheme(parameters, callback) {
     const screenSchemeId = typeof parameters === "string" ? parameters : parameters.screenSchemeId;
     const config3 = {
-      url: `/rest/api/2/screenscheme/${screenSchemeId}`,
+      url: `/rest/api/3/screenscheme/${screenSchemeId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/screenTabFields.mjs
+// node_modules/jira.js/dist/esm/version3/screenTabFields.mjs
 var ScreenTabFields = class {
   client;
   constructor(client) {
@@ -78266,7 +77744,7 @@ var ScreenTabFields = class {
   }
   async getAllScreenTabFields(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}/tabs/${parameters.tabId}/fields`,
+      url: `/rest/api/3/screens/${parameters.screenId}/tabs/${parameters.tabId}/fields`,
       method: "GET",
       params: {
         projectKey: parameters.projectKey
@@ -78276,7 +77754,7 @@ var ScreenTabFields = class {
   }
   async addScreenTabField(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}/tabs/${parameters.tabId}/fields`,
+      url: `/rest/api/3/screens/${parameters.screenId}/tabs/${parameters.tabId}/fields`,
       method: "POST",
       data: {
         fieldId: parameters.fieldId
@@ -78286,14 +77764,14 @@ var ScreenTabFields = class {
   }
   async removeScreenTabField(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}/tabs/${parameters.tabId}/fields/${parameters.id}`,
+      url: `/rest/api/3/screens/${parameters.screenId}/tabs/${parameters.tabId}/fields/${parameters.id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async moveScreenTabField(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}/tabs/${parameters.tabId}/fields/${parameters.id}/move`,
+      url: `/rest/api/3/screens/${parameters.screenId}/tabs/${parameters.tabId}/fields/${parameters.id}/move`,
       method: "POST",
       data: {
         after: parameters.after,
@@ -78304,7 +77782,7 @@ var ScreenTabFields = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/screenTabs.mjs
+// node_modules/jira.js/dist/esm/version3/screenTabs.mjs
 var ScreenTabs = class {
   client;
   constructor(client) {
@@ -78312,10 +77790,10 @@ var ScreenTabs = class {
   }
   async getBulkScreenTabs(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/screens/tabs",
+      url: "/rest/api/3/screens/tabs",
       method: "GET",
       params: {
-        screenId: parameters?.screenId,
+        screenId: paramSerializer("screenId", parameters?.screenId),
         tabId: parameters?.tabId,
         startAt: parameters?.startAt,
         maxResult: parameters?.maxResult
@@ -78326,7 +77804,7 @@ var ScreenTabs = class {
   async getAllScreenTabs(parameters, callback) {
     const screenId = typeof parameters === "string" ? parameters : parameters.screenId;
     const config3 = {
-      url: `/rest/api/2/screens/${screenId}/tabs`,
+      url: `/rest/api/3/screens/${screenId}/tabs`,
       method: "GET",
       params: {
         projectKey: typeof parameters !== "string" && parameters.projectKey
@@ -78336,7 +77814,7 @@ var ScreenTabs = class {
   }
   async addScreenTab(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}/tabs`,
+      url: `/rest/api/3/screens/${parameters.screenId}/tabs`,
       method: "POST",
       data: {
         id: parameters.id,
@@ -78347,7 +77825,7 @@ var ScreenTabs = class {
   }
   async renameScreenTab(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}/tabs/${parameters.tabId}`,
+      url: `/rest/api/3/screens/${parameters.screenId}/tabs/${parameters.tabId}`,
       method: "PUT",
       data: {
         id: parameters.id,
@@ -78358,21 +77836,21 @@ var ScreenTabs = class {
   }
   async deleteScreenTab(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}/tabs/${parameters.tabId}`,
+      url: `/rest/api/3/screens/${parameters.screenId}/tabs/${parameters.tabId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async moveScreenTab(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/screens/${parameters.screenId}/tabs/${parameters.tabId}/move/${parameters.pos}`,
+      url: `/rest/api/3/screens/${parameters.screenId}/tabs/${parameters.tabId}/move/${parameters.pos}`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/serverInfo.mjs
+// node_modules/jira.js/dist/esm/version3/serverInfo.mjs
 var ServerInfo = class {
   client;
   constructor(client) {
@@ -78380,14 +77858,14 @@ var ServerInfo = class {
   }
   async getServerInfo(callback) {
     const config3 = {
-      url: "/rest/api/2/serverInfo",
+      url: "/rest/api/3/serverInfo",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/serviceRegistry.mjs
+// node_modules/jira.js/dist/esm/version3/serviceRegistry.mjs
 var ServiceRegistry = class {
   client;
   constructor(client) {
@@ -78405,7 +77883,21 @@ var ServiceRegistry = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/status.mjs
+// node_modules/jira.js/dist/esm/schemas/pageSchema.mjs
+var PageSchema = (valueSchema) => external_exports.strictObject({
+  values: valueSchema.array(),
+  /** The index of the first item returned. */
+  startAt: external_exports.int(),
+  /** The maximum number of items that could be returned. */
+  maxResults: external_exports.int(),
+  /** The number of items returned. */
+  total: external_exports.int(),
+  /** Whether this is the last page. */
+  isLast: external_exports.boolean(),
+  self: external_exports.url()
+});
+
+// node_modules/jira.js/dist/esm/version3/status.mjs
 var Status = class {
   client;
   constructor(client) {
@@ -78414,29 +77906,29 @@ var Status = class {
   async getStatusesById(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: "/rest/api/2/statuses",
+      url: "/rest/api/3/statuses",
       method: "GET",
       params: {
         id,
-        expand: typeof parameters !== "string" && parameters.expand
+        expand: typeof parameters !== "string" ? parameters.expand : void 0
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async createStatuses(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/statuses",
+      url: "/rest/api/3/statuses",
       method: "POST",
       data: {
-        statuses: parameters.statuses,
-        scope: parameters.scope
+        scope: parameters.scope,
+        statuses: parameters.statuses
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateStatuses(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/statuses",
+      url: "/rest/api/3/statuses",
       method: "PUT",
       data: {
         statuses: parameters.statuses
@@ -78447,7 +77939,7 @@ var Status = class {
   async deleteStatusesById(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: "/rest/api/2/statuses",
+      url: "/rest/api/3/statuses",
       method: "DELETE",
       params: {
         id
@@ -78457,18 +77949,19 @@ var Status = class {
   }
   async getStatusesByName(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/statuses/byNames",
+      url: "/rest/api/3/statuses/byNames",
       method: "GET",
       params: {
         name: paramSerializer("name", parameters.name),
         projectId: parameters.projectId
       }
     };
-    return this.client.sendRequest(config3, callback);
+    const statuses = await this.client.sendRequest(config3, callback);
+    return JiraStatusSchema.array().parse(statuses);
   }
   async search(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/statuses/search",
+      url: "/rest/api/3/statuses/search",
       method: "GET",
       params: {
         expand: parameters?.expand,
@@ -78479,11 +77972,12 @@ var Status = class {
         statusCategory: parameters?.statusCategory
       }
     };
-    return this.client.sendRequest(config3, callback);
+    const statuses = await this.client.sendRequest(config3, callback);
+    return PageSchema(JiraStatusSchema).parse(statuses);
   }
   async getProjectIssueTypeUsagesForStatus(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/statuses/${parameters.statusId}/project/${parameters.projectId}/issueTypeUsages`,
+      url: `/rest/api/3/statuses/${parameters.statusId}/project/${parameters.projectId}/issueTypeUsages`,
       method: "GET",
       params: {
         nextPageToken: parameters.nextPageToken,
@@ -78494,7 +77988,7 @@ var Status = class {
   }
   async getProjectUsagesForStatus(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/statuses/${parameters.statusId}/projectUsages`,
+      url: `/rest/api/3/statuses/${parameters.statusId}/projectUsages`,
       method: "GET",
       params: {
         nextPageToken: parameters.nextPageToken,
@@ -78505,7 +77999,7 @@ var Status = class {
   }
   async getWorkflowUsagesForStatus(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/statuses/${parameters.statusId}/workflowUsages`,
+      url: `/rest/api/3/statuses/${parameters.statusId}/workflowUsages`,
       method: "GET",
       params: {
         nextPageToken: parameters.nextPageToken,
@@ -78516,7 +78010,7 @@ var Status = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/tasks.mjs
+// node_modules/jira.js/dist/esm/version3/tasks.mjs
 var Tasks = class {
   client;
   constructor(client) {
@@ -78525,7 +78019,7 @@ var Tasks = class {
   async getTask(parameters, callback) {
     const taskId = typeof parameters === "string" ? parameters : parameters.taskId;
     const config3 = {
-      url: `/rest/api/2/task/${taskId}`,
+      url: `/rest/api/3/task/${taskId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -78533,14 +78027,14 @@ var Tasks = class {
   async cancelTask(parameters, callback) {
     const taskId = typeof parameters === "string" ? parameters : parameters.taskId;
     const config3 = {
-      url: `/rest/api/2/task/${taskId}/cancel`,
+      url: `/rest/api/3/task/${taskId}/cancel`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/teamsInPlan.mjs
+// node_modules/jira.js/dist/esm/version3/teamsInPlan.mjs
 var TeamsInPlan = class {
   client;
   constructor(client) {
@@ -78548,7 +78042,7 @@ var TeamsInPlan = class {
   }
   async getTeams(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team`,
       method: "GET",
       params: {
         cursor: parameters.cursor,
@@ -78559,7 +78053,7 @@ var TeamsInPlan = class {
   }
   async addAtlassianTeam(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team/atlassian`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team/atlassian`,
       method: "POST",
       data: {
         capacity: parameters.capacity,
@@ -78573,28 +78067,28 @@ var TeamsInPlan = class {
   }
   async getAtlassianTeam(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team/atlassian/${parameters.atlassianTeamId}`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team/atlassian/${parameters.atlassianTeamId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateAtlassianTeam(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team/atlassian/${parameters.atlassianTeamId}`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team/atlassian/${parameters.atlassianTeamId}`,
       method: "PUT"
     };
     return this.client.sendRequest(config3, callback);
   }
   async removeAtlassianTeam(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team/atlassian/${parameters.atlassianTeamId}`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team/atlassian/${parameters.atlassianTeamId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async createPlanOnlyTeam(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team/planonly`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team/planonly`,
       method: "POST",
       data: {
         capacity: parameters.capacity,
@@ -78609,28 +78103,28 @@ var TeamsInPlan = class {
   }
   async getPlanOnlyTeam(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team/planonly/${parameters.planOnlyTeamId}`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team/planonly/${parameters.planOnlyTeamId}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updatePlanOnlyTeam(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team/planonly/${parameters.planOnlyTeamId}`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team/planonly/${parameters.planOnlyTeamId}`,
       method: "PUT"
     };
     return this.client.sendRequest(config3, callback);
   }
   async deletePlanOnlyTeam(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/plans/plan/${parameters.planId}/team/planonly/${parameters.planOnlyTeamId}`,
+      url: `/rest/api/3/plans/plan/${parameters.planId}/team/planonly/${parameters.planOnlyTeamId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/timeTracking.mjs
+// node_modules/jira.js/dist/esm/version3/timeTracking.mjs
 var TimeTracking = class {
   client;
   constructor(client) {
@@ -78638,14 +78132,14 @@ var TimeTracking = class {
   }
   async getSelectedTimeTrackingImplementation(callback) {
     const config3 = {
-      url: "/rest/api/2/configuration/timetracking",
+      url: "/rest/api/3/configuration/timetracking",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async selectTimeTrackingImplementation(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/configuration/timetracking",
+      url: "/rest/api/3/configuration/timetracking",
       method: "PUT",
       data: {
         key: parameters?.key,
@@ -78657,34 +78151,34 @@ var TimeTracking = class {
   }
   async getAvailableTimeTrackingImplementations(callback) {
     const config3 = {
-      url: "/rest/api/2/configuration/timetracking/list",
+      url: "/rest/api/3/configuration/timetracking/list",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getSharedTimeTrackingConfiguration(callback) {
     const config3 = {
-      url: "/rest/api/2/configuration/timetracking/options",
+      url: "/rest/api/3/configuration/timetracking/options",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setSharedTimeTrackingConfiguration(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/configuration/timetracking/options",
+      url: "/rest/api/3/configuration/timetracking/options",
       method: "PUT",
       data: {
-        workingHoursPerDay: parameters.workingHoursPerDay,
-        workingDaysPerWeek: parameters.workingDaysPerWeek,
+        defaultUnit: parameters.defaultUnit,
         timeFormat: parameters.timeFormat,
-        defaultUnit: parameters.defaultUnit
+        workingDaysPerWeek: parameters.workingDaysPerWeek,
+        workingHoursPerDay: parameters.workingHoursPerDay
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/uIModificationsApps.mjs
+// node_modules/jira.js/dist/esm/version3/uIModificationsApps.mjs
 var UIModificationsApps = class {
   client;
   constructor(client) {
@@ -78692,7 +78186,7 @@ var UIModificationsApps = class {
   }
   async getUiModifications(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/uiModifications",
+      url: "/rest/api/3/uiModifications",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -78704,7 +78198,7 @@ var UIModificationsApps = class {
   }
   async createUiModification(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/uiModifications",
+      url: "/rest/api/3/uiModifications",
       method: "POST",
       data: {
         name: parameters.name,
@@ -78717,7 +78211,7 @@ var UIModificationsApps = class {
   }
   async updateUiModification(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/uiModifications/${parameters.uiModificationId}`,
+      url: `/rest/api/3/uiModifications/${parameters.uiModificationId}`,
       method: "PUT",
       data: {
         contexts: parameters.contexts,
@@ -78731,14 +78225,14 @@ var UIModificationsApps = class {
   async deleteUiModification(parameters, callback) {
     const uiModificationId = typeof parameters === "string" ? parameters : parameters.uiModificationId;
     const config3 = {
-      url: `/rest/api/2/uiModifications/${uiModificationId}`,
+      url: `/rest/api/3/uiModifications/${uiModificationId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/userNavProperties.mjs
+// node_modules/jira.js/dist/esm/version3/userNavProperties.mjs
 var UserNavProperties = class {
   client;
   constructor(client) {
@@ -78746,7 +78240,7 @@ var UserNavProperties = class {
   }
   async getUserNavProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/user/nav4-opt-property/${parameters.propertyKey}`,
+      url: `/rest/api/3/user/nav4-opt-property/${parameters.propertyKey}`,
       method: "GET",
       params: {
         accountId: parameters.accountId
@@ -78756,7 +78250,7 @@ var UserNavProperties = class {
   }
   async setUserNavProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/user/nav4-opt-property/${parameters.propertyKey}`,
+      url: `/rest/api/3/user/nav4-opt-property/${parameters.propertyKey}`,
       method: "PUT",
       params: {
         accountId: parameters.accountId
@@ -78766,7 +78260,7 @@ var UserNavProperties = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/userProperties.mjs
+// node_modules/jira.js/dist/esm/version3/userProperties.mjs
 var UserProperties = class {
   client;
   constructor(client) {
@@ -78774,7 +78268,7 @@ var UserProperties = class {
   }
   async getUserPropertyKeys(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/properties",
+      url: "/rest/api/3/user/properties",
       method: "GET",
       params: {
         accountId: parameters?.accountId,
@@ -78786,7 +78280,7 @@ var UserProperties = class {
   }
   async getUserProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/user/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/user/properties/${parameters.propertyKey}`,
       method: "GET",
       params: {
         accountId: parameters.accountId,
@@ -78798,7 +78292,7 @@ var UserProperties = class {
   }
   async setUserProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/user/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/user/properties/${parameters.propertyKey}`,
       method: "PUT",
       params: {
         accountId: parameters.accountId
@@ -78809,7 +78303,7 @@ var UserProperties = class {
   }
   async deleteUserProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/user/properties/${parameters.propertyKey}`,
+      url: `/rest/api/3/user/properties/${parameters.propertyKey}`,
       method: "DELETE",
       params: {
         accountId: parameters.accountId,
@@ -78821,7 +78315,7 @@ var UserProperties = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/users.mjs
+// node_modules/jira.js/dist/esm/version3/users.mjs
 var Users = class {
   client;
   constructor(client) {
@@ -78829,10 +78323,12 @@ var Users = class {
   }
   async getUser(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user",
+      url: "/rest/api/3/user",
       method: "GET",
       params: {
         accountId: parameters.accountId,
+        username: parameters.username,
+        key: parameters.key,
         expand: parameters.expand
       }
     };
@@ -78840,14 +78336,11 @@ var Users = class {
   }
   async createUser(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user",
+      url: "/rest/api/3/user",
       method: "POST",
       data: {
         emailAddress: parameters.emailAddress,
-        key: parameters.key,
-        name: parameters.name,
-        password: parameters.password,
-        products: parameters.products,
+        products: parameters.products ? parameters.products : ["jira-core", "jira-servicedesk", "jira-product-discovery", "jira-software"],
         self: parameters.self
       }
     };
@@ -78855,7 +78348,7 @@ var Users = class {
   }
   async removeUser(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user",
+      url: "/rest/api/3/user",
       method: "DELETE",
       params: {
         accountId: parameters.accountId,
@@ -78867,7 +78360,7 @@ var Users = class {
   }
   async bulkGetUsers(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/bulk",
+      url: "/rest/api/3/user/bulk",
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -78879,31 +78372,30 @@ var Users = class {
   }
   async bulkGetUsersMigration(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/bulk/migration",
+      url: "/rest/api/3/user/bulk/migration",
       method: "GET",
       params: {
-        startAt: parameters.startAt,
+        key: paramSerializer("key", parameters.key),
         maxResults: parameters.maxResults,
-        username: paramSerializer("username", parameters.username),
-        key: paramSerializer("key", parameters.key)
+        startAt: parameters.startAt,
+        username: paramSerializer("username", parameters.username)
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getUserDefaultColumns(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/columns",
+      url: "/rest/api/3/user/columns",
       method: "GET",
       params: {
-        accountId: parameters?.accountId,
-        username: parameters?.username
+        accountId: parameters?.accountId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async setUserColumns(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/columns",
+      url: "/rest/api/3/user/columns",
       method: "PUT",
       params: {
         accountId: parameters.accountId
@@ -78914,7 +78406,7 @@ var Users = class {
   }
   async resetUserColumns(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/columns",
+      url: "/rest/api/3/user/columns",
       method: "DELETE",
       params: {
         accountId: parameters.accountId,
@@ -78926,7 +78418,7 @@ var Users = class {
   async getUserEmail(parameters, callback) {
     const accountId = typeof parameters === "string" ? parameters : parameters.accountId;
     const config3 = {
-      url: "/rest/api/2/user/email",
+      url: "/rest/api/3/user/email",
       method: "GET",
       params: {
         accountId
@@ -78937,7 +78429,7 @@ var Users = class {
   async getUserEmailBulk(parameters, callback) {
     const accountId = typeof parameters === "string" ? parameters : parameters.accountId;
     const config3 = {
-      url: "/rest/api/2/user/email/bulk",
+      url: "/rest/api/3/user/email/bulk",
       method: "GET",
       params: {
         accountId
@@ -78947,19 +78439,17 @@ var Users = class {
   }
   async getUserGroups(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/groups",
+      url: "/rest/api/3/user/groups",
       method: "GET",
       params: {
-        accountId: parameters.accountId,
-        username: parameters.username,
-        key: parameters.key
+        accountId: parameters.accountId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async getAllUsersDefault(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/users",
+      url: "/rest/api/3/users",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -78970,7 +78460,7 @@ var Users = class {
   }
   async getAllUsers(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/users/search",
+      url: "/rest/api/3/users/search",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -78981,7 +78471,7 @@ var Users = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/userSearch.mjs
+// node_modules/jira.js/dist/esm/version3/userSearch.mjs
 var UserSearch = class {
   client;
   constructor(client) {
@@ -78989,7 +78479,7 @@ var UserSearch = class {
   }
   async findBulkAssignableUsers(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/assignable/multiProjectSearch",
+      url: "/rest/api/3/user/assignable/multiProjectSearch",
       method: "GET",
       params: {
         query: parameters.query,
@@ -79004,7 +78494,7 @@ var UserSearch = class {
   }
   async findAssignableUsers(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/assignable/search",
+      url: "/rest/api/3/user/assignable/search",
       method: "GET",
       params: {
         query: parameters?.query,
@@ -79024,7 +78514,7 @@ var UserSearch = class {
   }
   async findUsersWithAllPermissions(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/permission/search",
+      url: "/rest/api/3/user/permission/search",
       method: "GET",
       params: {
         query: parameters.query,
@@ -79041,7 +78531,7 @@ var UserSearch = class {
   }
   async findUsersForPicker(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/picker",
+      url: "/rest/api/3/user/picker",
       method: "GET",
       params: {
         query: parameters.query,
@@ -79056,7 +78546,7 @@ var UserSearch = class {
   }
   async findUsers(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/search",
+      url: "/rest/api/3/user/search",
       method: "GET",
       params: {
         query: parameters?.query,
@@ -79071,7 +78561,7 @@ var UserSearch = class {
   }
   async findUsersByQuery(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/search/query",
+      url: "/rest/api/3/user/search/query",
       method: "GET",
       params: {
         query: parameters.query,
@@ -79083,7 +78573,7 @@ var UserSearch = class {
   }
   async findUserKeysByQuery(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/search/query/key",
+      url: "/rest/api/3/user/search/query/key",
       method: "GET",
       params: {
         query: parameters.query,
@@ -79095,7 +78585,7 @@ var UserSearch = class {
   }
   async findUsersWithBrowsePermission(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/user/viewissue/search",
+      url: "/rest/api/3/user/viewissue/search",
       method: "GET",
       params: {
         query: parameters?.query,
@@ -79111,7 +78601,7 @@ var UserSearch = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/webhooks.mjs
+// node_modules/jira.js/dist/esm/version3/webhooks.mjs
 var Webhooks = class {
   client;
   constructor(client) {
@@ -79119,7 +78609,7 @@ var Webhooks = class {
   }
   async getDynamicWebhooksForApp(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/webhook",
+      url: "/rest/api/3/webhook",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -79130,18 +78620,18 @@ var Webhooks = class {
   }
   async registerDynamicWebhooks(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/webhook",
+      url: "/rest/api/3/webhook",
       method: "POST",
       data: {
-        webhooks: parameters.webhooks,
-        url: parameters.url
+        url: parameters.url,
+        webhooks: parameters.webhooks
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async deleteWebhookById(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/webhook",
+      url: "/rest/api/3/webhook",
       method: "DELETE",
       data: {
         webhookIds: parameters.webhookIds
@@ -79151,7 +78641,7 @@ var Webhooks = class {
   }
   async getFailedWebhooks(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/webhook/failed",
+      url: "/rest/api/3/webhook/failed",
       method: "GET",
       params: {
         maxResults: parameters?.maxResults,
@@ -79162,7 +78652,7 @@ var Webhooks = class {
   }
   async refreshWebhooks(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/webhook/refresh",
+      url: "/rest/api/3/webhook/refresh",
       method: "PUT",
       data: {
         webhookIds: parameters.webhookIds
@@ -79172,7 +78662,7 @@ var Webhooks = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/workflows.mjs
+// node_modules/jira.js/dist/esm/version3/workflows.mjs
 var Workflows = class {
   client;
   constructor(client) {
@@ -79180,7 +78670,7 @@ var Workflows = class {
   }
   async createWorkflow(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflow",
+      url: "/rest/api/3/workflow",
       method: "POST",
       data: {
         description: parameters.description,
@@ -79191,9 +78681,33 @@ var Workflows = class {
     };
     return this.client.sendRequest(config3, callback);
   }
+  async readWorkflowFromHistory(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/workflow/history",
+      method: "POST",
+      data: {
+        version: parameters.version,
+        workflowId: parameters.workflowId
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async listWorkflowHistory(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/workflow/history/list",
+      method: "POST",
+      params: {
+        expand: parameters.expand
+      },
+      data: {
+        workflowId: parameters.workflowId
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
   async getWorkflowsPaginated(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflow/search",
+      url: "/rest/api/3/workflow/search",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -79207,17 +78721,30 @@ var Workflows = class {
     };
     return this.client.sendRequest(config3, callback);
   }
+  /**
+   * Deletes a workflow.
+   *
+   * The workflow cannot be deleted if it is:
+   *
+   * - An active workflow.
+   * - A system workflow.
+   * - Associated with any workflow scheme.
+   * - Associated with any draft workflow scheme.
+   *
+   * **[Permissions](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#permissions) required:**
+   * _Administer Jira_ [global permission](https://confluence.atlassian.com/x/x4dKLg).
+   */
   async deleteInactiveWorkflow(parameters, callback) {
     const entityId = typeof parameters === "string" ? parameters : parameters.entityId;
     const config3 = {
-      url: `/rest/api/2/workflow/${entityId}`,
+      url: `/rest/api/3/workflow/${entityId}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getWorkflowProjectIssueTypeUsages(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflow/${parameters.workflowId}/project/${parameters.projectId}/issueTypeUsages`,
+      url: `/rest/api/3/workflow/${parameters.workflowId}/project/${parameters.projectId}/issueTypeUsages`,
       method: "GET",
       params: {
         nextPageToken: parameters.nextPageToken,
@@ -79228,7 +78755,7 @@ var Workflows = class {
   }
   async getProjectUsagesForWorkflow(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflow/${parameters.workflowId}/projectUsages`,
+      url: `/rest/api/3/workflow/${parameters.workflowId}/projectUsages`,
       method: "GET",
       params: {
         nextPageToken: parameters.nextPageToken,
@@ -79239,7 +78766,7 @@ var Workflows = class {
   }
   async getWorkflowSchemeUsagesForWorkflow(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflow/${parameters.workflowId}/workflowSchemes`,
+      url: `/rest/api/3/workflow/${parameters.workflowId}/workflowSchemes`,
       method: "GET",
       params: {
         nextPageToken: parameters.nextPageToken,
@@ -79250,35 +78777,35 @@ var Workflows = class {
   }
   async readWorkflows(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflows",
+      url: "/rest/api/3/workflows",
       method: "POST",
       params: {
-        useTransitionLinksFormat: parameters.useTransitionLinksFormat,
-        useApprovalConfiguration: parameters.useApprovalConfiguration
+        useTransitionLinksFormat: parameters?.useTransitionLinksFormat,
+        useApprovalConfiguration: parameters?.useApprovalConfiguration
       },
       data: {
-        projectAndIssueTypes: parameters.projectAndIssueTypes,
-        workflowIds: parameters.workflowIds,
-        workflowNames: parameters.workflowNames
+        projectAndIssueTypes: parameters?.projectAndIssueTypes,
+        workflowIds: parameters?.workflowIds,
+        workflowNames: parameters?.workflowNames
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async workflowCapabilities(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflows/capabilities",
+      url: "/rest/api/3/workflows/capabilities",
       method: "GET",
       params: {
-        workflowId: parameters.workflowId,
-        projectId: parameters.projectId,
-        issueTypeId: parameters.issueTypeId
+        workflowId: parameters?.workflowId,
+        projectId: parameters?.projectId,
+        issueTypeId: parameters?.issueTypeId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
   async createWorkflows(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflows/create",
+      url: "/rest/api/3/workflows/create",
       method: "POST",
       data: {
         scope: parameters.scope,
@@ -79290,7 +78817,7 @@ var Workflows = class {
   }
   async validateCreateWorkflows(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflows/create/validation",
+      url: "/rest/api/3/workflows/create/validation",
       method: "POST",
       data: {
         payload: parameters.payload,
@@ -79299,9 +78826,29 @@ var Workflows = class {
     };
     return this.client.sendRequest(config3, callback);
   }
+  async getDefaultEditor(callback) {
+    const config3 = {
+      url: "/rest/api/3/workflows/defaultEditor",
+      method: "GET"
+    };
+    return this.client.sendRequest(config3, callback);
+  }
+  async readWorkflowPreviews(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/workflows/preview",
+      method: "POST",
+      data: {
+        issueTypeIds: parameters.issueTypeIds,
+        projectId: parameters.projectId,
+        workflowIds: parameters.workflowIds,
+        workflowNames: parameters.workflowNames
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
   async searchWorkflows(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflows/search",
+      url: "/rest/api/3/workflows/search",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -79317,7 +78864,7 @@ var Workflows = class {
   }
   async updateWorkflows(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflows/update",
+      url: "/rest/api/3/workflows/update",
       method: "POST",
       params: {
         expand: parameters.expand
@@ -79331,7 +78878,7 @@ var Workflows = class {
   }
   async validateUpdateWorkflows(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflows/update/validation",
+      url: "/rest/api/3/workflows/update/validation",
       method: "POST",
       data: {
         payload: parameters.payload,
@@ -79340,53 +78887,9 @@ var Workflows = class {
     };
     return this.client.sendRequest(config3, callback);
   }
-  async readWorkflowFromHistory(parameters, callback) {
-    const config3 = {
-      url: "/rest/api/2/workflow/history",
-      method: "POST",
-      data: {
-        version: parameters.version,
-        workflowId: parameters.workflowId
-      }
-    };
-    return this.client.sendRequest(config3, callback);
-  }
-  async listWorkflowHistory(parameters, callback) {
-    const config3 = {
-      url: "/rest/api/2/workflow/history/list",
-      method: "POST",
-      params: {
-        expand: parameters.expand
-      },
-      data: {
-        workflowId: parameters.workflowId
-      }
-    };
-    return this.client.sendRequest(config3, callback);
-  }
-  async getDefaultEditor(callback) {
-    const config3 = {
-      url: "/rest/api/2/workflows/defaultEditor",
-      method: "GET"
-    };
-    return this.client.sendRequest(config3, callback);
-  }
-  async readWorkflowPreviews(parameters, callback) {
-    const config3 = {
-      url: "/rest/api/2/workflows/preview",
-      method: "POST",
-      data: {
-        issueTypeIds: parameters.issueTypeIds,
-        projectId: parameters.projectId,
-        workflowIds: parameters.workflowIds,
-        workflowNames: parameters.workflowNames
-      }
-    };
-    return this.client.sendRequest(config3, callback);
-  }
 };
 
-// node_modules/jira.js/dist/esm/version2/workflowSchemeDrafts.mjs
+// node_modules/jira.js/dist/esm/version3/workflowSchemeDrafts.mjs
 var WorkflowSchemeDrafts = class {
   client;
   constructor(client) {
@@ -79395,7 +78898,7 @@ var WorkflowSchemeDrafts = class {
   async createWorkflowSchemeDraftFromParent(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/createdraft`,
+      url: `/rest/api/3/workflowscheme/${id}/createdraft`,
       method: "POST"
     };
     return this.client.sendRequest(config3, callback);
@@ -79403,14 +78906,14 @@ var WorkflowSchemeDrafts = class {
   async getWorkflowSchemeDraft(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/draft`,
+      url: `/rest/api/3/workflowscheme/${id}/draft`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateWorkflowSchemeDraft(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/draft`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/draft`,
       method: "PUT",
       data: {
         name: parameters.name,
@@ -79425,7 +78928,7 @@ var WorkflowSchemeDrafts = class {
   async deleteWorkflowSchemeDraft(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/draft`,
+      url: `/rest/api/3/workflowscheme/${id}/draft`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -79433,14 +78936,14 @@ var WorkflowSchemeDrafts = class {
   async getDraftDefaultWorkflow(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/draft/default`,
+      url: `/rest/api/3/workflowscheme/${id}/draft/default`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async updateDraftDefaultWorkflow(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/draft/default`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/draft/default`,
       method: "PUT",
       data: {
         updateDraftIfNeeded: parameters.updateDraftIfNeeded,
@@ -79452,21 +78955,21 @@ var WorkflowSchemeDrafts = class {
   async deleteDraftDefaultWorkflow(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/draft/default`,
+      url: `/rest/api/3/workflowscheme/${id}/draft/default`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
   }
   async getWorkflowSchemeDraftIssueType(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/draft/issuetype/${parameters.issueType}`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/draft/issuetype/${parameters.issueType}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
   async setWorkflowSchemeDraftIssueType(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/draft/issuetype/${parameters.issueType}`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/draft/issuetype/${parameters.issueType}`,
       method: "PUT",
       data: parameters.details
     };
@@ -79474,7 +78977,7 @@ var WorkflowSchemeDrafts = class {
   }
   async deleteWorkflowSchemeDraftIssueType(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/draft/issuetype/${parameters.issueType}`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/draft/issuetype/${parameters.issueType}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -79482,7 +78985,7 @@ var WorkflowSchemeDrafts = class {
   async publishDraftWorkflowScheme(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/draft/publish`,
+      url: `/rest/api/3/workflowscheme/${id}/draft/publish`,
       method: "POST",
       params: {
         validateOnly: typeof parameters !== "string" && parameters.validateOnly
@@ -79495,7 +78998,7 @@ var WorkflowSchemeDrafts = class {
   }
   async getDraftWorkflow(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/draft/workflow`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/draft/workflow`,
       method: "GET",
       params: {
         workflowName: parameters.workflowName
@@ -79505,7 +79008,7 @@ var WorkflowSchemeDrafts = class {
   }
   async updateDraftWorkflowMapping(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/draft/workflow`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/draft/workflow`,
       method: "PUT",
       params: {
         workflowName: parameters.workflowName
@@ -79521,7 +79024,7 @@ var WorkflowSchemeDrafts = class {
   }
   async deleteDraftWorkflowMapping(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/draft/workflow`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/draft/workflow`,
       method: "DELETE",
       params: {
         workflowName: parameters.workflowName
@@ -79531,7 +79034,7 @@ var WorkflowSchemeDrafts = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/workflowSchemeProjectAssociations.mjs
+// node_modules/jira.js/dist/esm/version3/workflowSchemeProjectAssociations.mjs
 var WorkflowSchemeProjectAssociations = class {
   client;
   constructor(client) {
@@ -79539,7 +79042,7 @@ var WorkflowSchemeProjectAssociations = class {
   }
   async getWorkflowSchemeProjectAssociations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflowscheme/project",
+      url: "/rest/api/3/workflowscheme/project",
       method: "GET",
       params: {
         projectId: paramSerializer("projectId", parameters.projectId)
@@ -79549,18 +79052,18 @@ var WorkflowSchemeProjectAssociations = class {
   }
   async assignSchemeToProject(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflowscheme/project",
+      url: "/rest/api/3/workflowscheme/project",
       method: "PUT",
       data: {
-        workflowSchemeId: parameters.workflowSchemeId,
-        projectId: parameters.projectId
+        projectId: parameters.projectId,
+        workflowSchemeId: parameters.workflowSchemeId
       }
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/workflowSchemes.mjs
+// node_modules/jira.js/dist/esm/version3/workflowSchemes.mjs
 var WorkflowSchemes = class {
   client;
   constructor(client) {
@@ -79568,7 +79071,7 @@ var WorkflowSchemes = class {
   }
   async getAllWorkflowSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflowscheme",
+      url: "/rest/api/3/workflowscheme",
       method: "GET",
       params: {
         startAt: parameters?.startAt,
@@ -79579,7 +79082,7 @@ var WorkflowSchemes = class {
   }
   async createWorkflowScheme(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflowscheme",
+      url: "/rest/api/3/workflowscheme",
       method: "POST",
       data: {
         defaultWorkflow: parameters.defaultWorkflow,
@@ -79599,13 +79102,22 @@ var WorkflowSchemes = class {
     };
     return this.client.sendRequest(config3, callback);
   }
+  async switchWorkflowSchemeForProject(parameters, callback) {
+    const config3 = {
+      url: "/rest/api/3/workflowscheme/project/switch",
+      method: "POST",
+      data: {
+        mappingsByIssueTypeOverride: parameters.mappingsByIssueTypeOverride,
+        projectId: parameters.projectId,
+        targetSchemeId: parameters.targetSchemeId
+      }
+    };
+    return this.client.sendRequest(config3, callback);
+  }
   async readWorkflowSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflowscheme/read",
+      url: "/rest/api/3/workflowscheme/read",
       method: "POST",
-      params: {
-        expand: parameters.expand
-      },
       data: {
         projectIds: parameters.projectIds,
         workflowSchemeIds: parameters.workflowSchemeIds
@@ -79615,7 +79127,7 @@ var WorkflowSchemes = class {
   }
   async updateSchemes(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflowscheme/update",
+      url: "/rest/api/3/workflowscheme/update",
       method: "POST",
       data: {
         defaultWorkflowId: parameters.defaultWorkflowId,
@@ -79632,7 +79144,7 @@ var WorkflowSchemes = class {
   }
   async updateWorkflowSchemeMappings(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflowscheme/update/mappings",
+      url: "/rest/api/3/workflowscheme/update/mappings",
       method: "POST",
       data: {
         defaultWorkflowId: parameters.defaultWorkflowId,
@@ -79645,7 +79157,7 @@ var WorkflowSchemes = class {
   async getWorkflowScheme(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}`,
+      url: `/rest/api/3/workflowscheme/${id}`,
       method: "GET",
       params: {
         returnDraftIfExists: typeof parameters !== "string" && parameters.returnDraftIfExists
@@ -79655,7 +79167,7 @@ var WorkflowSchemes = class {
   }
   async updateWorkflowScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}`,
       method: "PUT",
       data: {
         name: parameters.name,
@@ -79670,7 +79182,7 @@ var WorkflowSchemes = class {
   async deleteWorkflowScheme(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}`,
+      url: `/rest/api/3/workflowscheme/${id}`,
       method: "DELETE"
     };
     return this.client.sendRequest(config3, callback);
@@ -79678,7 +79190,7 @@ var WorkflowSchemes = class {
   async getDefaultWorkflow(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/default`,
+      url: `/rest/api/3/workflowscheme/${id}/default`,
       method: "GET",
       params: {
         returnDraftIfExists: typeof parameters !== "string" && parameters.returnDraftIfExists
@@ -79688,7 +79200,7 @@ var WorkflowSchemes = class {
   }
   async updateDefaultWorkflow(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/default`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/default`,
       method: "PUT",
       data: {
         updateDraftIfNeeded: parameters.updateDraftIfNeeded,
@@ -79700,7 +79212,7 @@ var WorkflowSchemes = class {
   async deleteDefaultWorkflow(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/default`,
+      url: `/rest/api/3/workflowscheme/${id}/default`,
       method: "DELETE",
       params: {
         updateDraftIfNeeded: typeof parameters !== "string" && parameters.updateDraftIfNeeded
@@ -79710,7 +79222,7 @@ var WorkflowSchemes = class {
   }
   async getWorkflowSchemeIssueType(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/issuetype/${parameters.issueType}`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/issuetype/${parameters.issueType}`,
       method: "GET",
       params: {
         returnDraftIfExists: parameters.returnDraftIfExists
@@ -79720,7 +79232,7 @@ var WorkflowSchemes = class {
   }
   async setWorkflowSchemeIssueType(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/issuetype/${parameters.issueType}`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/issuetype/${parameters.issueType}`,
       method: "PUT",
       data: parameters.details
     };
@@ -79728,7 +79240,7 @@ var WorkflowSchemes = class {
   }
   async deleteWorkflowSchemeIssueType(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/issuetype/${parameters.issueType}`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/issuetype/${parameters.issueType}`,
       method: "DELETE",
       params: {
         updateDraftIfNeeded: parameters.updateDraftIfNeeded
@@ -79739,7 +79251,7 @@ var WorkflowSchemes = class {
   async getWorkflow(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/workflow`,
+      url: `/rest/api/3/workflowscheme/${id}/workflow`,
       method: "GET",
       params: {
         workflowName: typeof parameters !== "string" && parameters.workflowName,
@@ -79750,7 +79262,7 @@ var WorkflowSchemes = class {
   }
   async updateWorkflowMapping(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.id}/workflow`,
+      url: `/rest/api/3/workflowscheme/${parameters.id}/workflow`,
       method: "PUT",
       params: {
         workflowName: parameters.workflowName
@@ -79767,7 +79279,7 @@ var WorkflowSchemes = class {
   async deleteWorkflowMapping(parameters, callback) {
     const id = typeof parameters === "string" ? parameters : parameters.id;
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${id}/workflow`,
+      url: `/rest/api/3/workflowscheme/${id}/workflow`,
       method: "DELETE",
       params: {
         workflowName: typeof parameters !== "string" && parameters.workflowName,
@@ -79778,7 +79290,7 @@ var WorkflowSchemes = class {
   }
   async getProjectUsagesForWorkflowScheme(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflowscheme/${parameters.workflowSchemeId}/projectUsages`,
+      url: `/rest/api/3/workflowscheme/${parameters.workflowSchemeId}/projectUsages`,
       method: "GET",
       params: {
         nextPageToken: parameters.nextPageToken,
@@ -79787,21 +79299,9 @@ var WorkflowSchemes = class {
     };
     return this.client.sendRequest(config3, callback);
   }
-  async switchWorkflowSchemeForProject(parameters, callback) {
-    const config3 = {
-      url: "/rest/api/2/workflowscheme/project/switch",
-      method: "POST",
-      data: {
-        mappingsByIssueTypeOverride: parameters.mappingsByIssueTypeOverride,
-        projectId: parameters.projectId,
-        targetSchemeId: parameters.targetSchemeId
-      }
-    };
-    return this.client.sendRequest(config3, callback);
-  }
 };
 
-// node_modules/jira.js/dist/esm/version2/workflowStatusCategories.mjs
+// node_modules/jira.js/dist/esm/version3/workflowStatusCategories.mjs
 var WorkflowStatusCategories = class {
   client;
   constructor(client) {
@@ -79809,7 +79309,7 @@ var WorkflowStatusCategories = class {
   }
   async getStatusCategories(callback) {
     const config3 = {
-      url: "/rest/api/2/statuscategory",
+      url: "/rest/api/3/statuscategory",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -79817,14 +79317,14 @@ var WorkflowStatusCategories = class {
   async getStatusCategory(parameters, callback) {
     const idOrKey = typeof parameters === "string" ? parameters : parameters.idOrKey;
     const config3 = {
-      url: `/rest/api/2/statuscategory/${idOrKey}`,
+      url: `/rest/api/3/statuscategory/${idOrKey}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/workflowStatuses.mjs
+// node_modules/jira.js/dist/esm/version3/workflowStatuses.mjs
 var WorkflowStatuses = class {
   client;
   constructor(client) {
@@ -79832,7 +79332,7 @@ var WorkflowStatuses = class {
   }
   async getStatuses(callback) {
     const config3 = {
-      url: "/rest/api/2/status",
+      url: "/rest/api/3/status",
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
@@ -79840,14 +79340,14 @@ var WorkflowStatuses = class {
   async getStatus(parameters, callback) {
     const idOrName = typeof parameters === "string" ? parameters : parameters.idOrName;
     const config3 = {
-      url: `/rest/api/2/status/${idOrName}`,
+      url: `/rest/api/3/status/${idOrName}`,
       method: "GET"
     };
     return this.client.sendRequest(config3, callback);
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/workflowTransitionProperties.mjs
+// node_modules/jira.js/dist/esm/version3/workflowTransitionProperties.mjs
 var WorkflowTransitionProperties = class {
   client;
   constructor(client) {
@@ -79855,7 +79355,7 @@ var WorkflowTransitionProperties = class {
   }
   async getWorkflowTransitionProperties(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflow/transitions/${parameters.transitionId}/properties`,
+      url: `/rest/api/3/workflow/transitions/${parameters.transitionId}/properties`,
       method: "GET",
       params: {
         includeReservedKeys: parameters.includeReservedKeys,
@@ -79868,7 +79368,7 @@ var WorkflowTransitionProperties = class {
   }
   async createWorkflowTransitionProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflow/transitions/${parameters.transitionId}/properties`,
+      url: `/rest/api/3/workflow/transitions/${parameters.transitionId}/properties`,
       method: "POST",
       params: {
         key: parameters.key,
@@ -79887,7 +79387,7 @@ var WorkflowTransitionProperties = class {
   }
   async updateWorkflowTransitionProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflow/transitions/${parameters.transitionId}/properties`,
+      url: `/rest/api/3/workflow/transitions/${parameters.transitionId}/properties`,
       method: "PUT",
       params: {
         key: parameters.key,
@@ -79906,7 +79406,7 @@ var WorkflowTransitionProperties = class {
   }
   async deleteWorkflowTransitionProperty(parameters, callback) {
     const config3 = {
-      url: `/rest/api/2/workflow/transitions/${parameters.transitionId}/properties`,
+      url: `/rest/api/3/workflow/transitions/${parameters.transitionId}/properties`,
       method: "DELETE",
       params: {
         key: parameters.key,
@@ -79918,7 +79418,7 @@ var WorkflowTransitionProperties = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/workflowTransitionRules.mjs
+// node_modules/jira.js/dist/esm/version3/workflowTransitionRules.mjs
 var WorkflowTransitionRules = class {
   client;
   constructor(client) {
@@ -79926,7 +79426,7 @@ var WorkflowTransitionRules = class {
   }
   async getWorkflowTransitionRuleConfigurations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflow/rule/config",
+      url: "/rest/api/3/workflow/rule/config",
       method: "GET",
       params: {
         startAt: parameters.startAt,
@@ -79943,7 +79443,7 @@ var WorkflowTransitionRules = class {
   }
   async updateWorkflowTransitionRuleConfigurations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflow/rule/config",
+      url: "/rest/api/3/workflow/rule/config",
       method: "PUT",
       data: {
         workflows: parameters.workflows
@@ -79953,7 +79453,7 @@ var WorkflowTransitionRules = class {
   }
   async deleteWorkflowTransitionRuleConfigurations(parameters, callback) {
     const config3 = {
-      url: "/rest/api/2/workflow/rule/config/delete",
+      url: "/rest/api/3/workflow/rule/config/delete",
       method: "PUT",
       data: {
         workflows: parameters?.workflows
@@ -79963,8 +79463,8 @@ var WorkflowTransitionRules = class {
   }
 };
 
-// node_modules/jira.js/dist/esm/version2/client/version2Client.mjs
-var Version2Client = class extends BaseClient {
+// node_modules/jira.js/dist/esm/version3/client/version3Client.mjs
+var Version3Client = class extends BaseClient {
   announcementBanner = new AnnouncementBanner(this);
   api = new Api(this);
   appDataPolicies = new AppDataPolicies(this);
@@ -79981,7 +79481,9 @@ var Version2Client = class extends BaseClient {
   filterSharing = new FilterSharing(this);
   groupAndUserPicker = new GroupAndUserPicker(this);
   groups = new Groups(this);
+  instanceInformation = new InstanceInformation(this);
   issueAttachments = new IssueAttachments(this);
+  issueBulkOperations = new IssueBulkOperations(this);
   issueCommentProperties = new IssueCommentProperties(this);
   issueComments = new IssueComments(this);
   issueCustomFieldAssociations = new IssueCustomFieldAssociations(this);
@@ -80068,13 +79570,14 @@ var Version2Client = class extends BaseClient {
 
 // src/jira.ts
 var Jira = class {
-  constructor(instance, apiToken) {
+  constructor(instance, apiToken, email3) {
     this.instance = instance;
-    this.api = new Version2Client({
+    this.api = new Version3Client({
       host: instance,
       authentication: {
-        oauth2: {
-          accessToken: apiToken
+        basic: {
+          email: email3,
+          apiToken
         }
       }
     });
@@ -80112,6 +79615,7 @@ var Jira = class {
 // src/action.ts
 async function action(octokit2, pr) {
   const trackerType = getInput("tracker-type");
+  const jiraEmail = getInput("jira-email", { required: true });
   const config3 = await Config.getConfig(octokit2);
   let trackerController = void 0;
   switch (trackerType) {
@@ -80126,7 +79630,9 @@ async function action(octokit2, pr) {
     case "jira":
       const jiraInstance = getInput("jira-instance", { required: true });
       const jiraAPIToken = getInput("jira-api-token", { required: true });
-      trackerController = new Controller(new Jira(jiraInstance, jiraAPIToken));
+      trackerController = new Controller(
+        new Jira(jiraInstance, jiraAPIToken, jiraEmail)
+      );
       debug(
         `Using Jira '${jiraInstance}', version: '${await trackerController.adapter.getVersion()}'`
       );
