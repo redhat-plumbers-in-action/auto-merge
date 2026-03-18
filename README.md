@@ -188,7 +188,7 @@ The tracker type. Currently supported: `bugzilla`, `jira`, and `none`. When defi
 
 The URL of the Bugzilla instance on which will be performed API requests and validation of trackers. For example: `bugzilla-instance: https://bugzilla.redhat.com`.
 
-* default value: `undefined`
+* default value: `https://bugzilla.redhat.com`
 * requirements: `optional`
 
 ### bugzilla-api-token
@@ -202,7 +202,14 @@ The Bugzilla API token is used for performing API requests. The token should be 
 
 The URL of the Jira instance on which will be performed API requests and validation of trackers. For example: `jira-instance: https://redhat.atlassian.net`.
 
-* default value: `undefined`
+* default value: `https://redhat.atlassian.net`
+* requirements: `required`
+
+### jira-email
+
+The email of the Jira user on which will be performed API requests. For example: `jira-email: systemd-maint@redhat.com`.
+
+* default value: `systemd-maint@redhat.com`
 * requirements: `required`
 
 ### jira-api-token
